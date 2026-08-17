@@ -9,7 +9,7 @@ import { CLIError } from '../../lib/errors.js';
 const tempDirs: string[] = [];
 
 async function makeTempProject(files: Record<string, string>): Promise<string> {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'insforge-ignore-test-'));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'yarah-ignore-test-'));
   tempDirs.push(dir);
   for (const [relPath, content] of Object.entries(files)) {
     const absPath = path.join(dir, relPath);

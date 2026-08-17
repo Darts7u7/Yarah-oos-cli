@@ -1,7 +1,7 @@
 /**
  * Thin wrapper around `docker compose` for local instances.
  *
- * The compose file is InsForge's own, fetched into `.insforge/checkout/` by its
+ * The compose file is Yarah's own, fetched into `.yarah/checkout/` by its
  * setup.sh (see checkout.ts) and run unmodified. The CLI adds one overlay, for
  * the telemetry stamp, and supplies ports and keys through `--env-file`.
  */
@@ -35,7 +35,7 @@ export function assetsDir(): string {
   }
   throw new CLIError(
     `${CLI_OVERLAY} is missing from this CLI installation.\n` +
-      'Reinstall with `npm i -g @insforge/cli@latest`, or run via `npx -y @insforge/cli@latest`.',
+      'Reinstall with `npm i -g @yarahdev/cli@latest`, or run via `npx -y @yarahdev/cli@latest`.',
   );
 }
 
@@ -56,7 +56,7 @@ export function composeFiles(storage: StorageBackend, cwd?: string): string[] {
 export interface ComposeContext {
   projectName: string;
   storage: StorageBackend;
-  /** Directory holding .insforge/. Defaults to cwd. */
+  /** Directory holding .yarah/. Defaults to cwd. */
   cwd?: string;
 }
 
@@ -205,7 +205,7 @@ export function removeProjectVolumes(projectName: string): VolumeSweep {
 /**
  * Tear a project down with plain docker, no compose.
  *
- * Every compose call needs --env-file, so losing .insforge/checkout/.env leaves
+ * Every compose call needs --env-file, so losing .yarah/checkout/.env leaves
  * `local stop --delete-data` unable to remove the containers it created — which
  * is precisely the state a refused start tells people to resolve that way.
  * Labels are enough to find them without any of the files.

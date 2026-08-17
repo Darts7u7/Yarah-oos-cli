@@ -12,7 +12,7 @@ import { readLocalState } from '../../lib/local/state.js';
 export function registerLocalStatusCommand(localCmd: Command): void {
   localCmd
     .command('status')
-    .description('Show the local InsForge instance for this directory: ports, keys, container health')
+    .description('Show the local Yarah instance for this directory: ports, keys, container health')
     .option('--show-keys', 'Print the API key and admin password in full')
     .action(async (opts: { showKeys?: boolean }, cmd: Command) => {
       const { json } = getRootOpts(cmd);
@@ -22,7 +22,7 @@ export function registerLocalStatusCommand(localCmd: Command): void {
         const state = readLocalState();
         if (!state) {
           throw new CLIError(
-            'No local instance is recorded for this directory.\nRun `insforge local start` to create one.',
+            'No local instance is recorded for this directory.\nRun `yarah local start` to create one.',
           );
         }
 
@@ -72,7 +72,7 @@ export function registerLocalStatusCommand(localCmd: Command): void {
         outputInfo('');
         outputInfo(
           `  ${health.reachable ? pc.green('● healthy') : pc.yellow('○ not responding')}  ` +
-            `${pc.dim('InsForge')} ${health.version ?? 'latest published'}`,
+            `${pc.dim('Yarah')} ${health.version ?? 'latest published'}`,
         );
         outputInfo('');
         outputInfo(`  ${pc.dim('API URL   ')} ${pc.cyan(baseUrl)}`);
@@ -93,7 +93,7 @@ export function registerLocalStatusCommand(localCmd: Command): void {
         outputInfo('');
 
         if (services.length === 0) {
-          outputInfo('  No containers. Run `insforge local start` to bring the instance up.');
+          outputInfo('  No containers. Run `yarah local start` to bring the instance up.');
         } else {
           outputTable(
             ['SERVICE', 'STATE', 'STATUS'],

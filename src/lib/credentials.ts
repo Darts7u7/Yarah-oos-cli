@@ -24,7 +24,7 @@ export async function requireAuth(apiUrl?: string, allowOssBypass = true): Promi
       user: {
         id: 'oss-user',
         name: 'OSS User',
-        email: 'oss@insforge.local',
+        email: 'oss@yarah.local',
         avatar_url: null,
         email_verified: true,
       },
@@ -55,7 +55,7 @@ export async function requireAuth(apiUrl?: string, allowOssBypass = true): Promi
 
       const retry = await prompts.confirm({ message: 'Would you like to try again?' });
       if (prompts.isCancel(retry) || !retry) {
-        throw new AuthError('Authentication required. Run `npx @insforge/cli login` to authenticate.');
+        throw new AuthError('Authentication required. Run `npx @yarahdev/cli login` to authenticate.');
       }
     }
   }
@@ -64,7 +64,7 @@ export async function requireAuth(apiUrl?: string, allowOssBypass = true): Promi
 export async function refreshAccessToken(apiUrl?: string): Promise<string> {
   const creds = getCredentials();
   if (!creds) {
-    throw new AuthError('Not logged in. Run `npx @insforge/cli login` first.');
+    throw new AuthError('Not logged in. Run `npx @yarahdev/cli login` first.');
   }
 
   const platformUrl = getPlatformApiUrl(apiUrl);
@@ -74,7 +74,7 @@ export async function refreshAccessToken(apiUrl?: string): Promise<string> {
   // revoked or expired — surface a clear re-login message rather than looping.
   if (isDirectApiKeyLogin(creds)) {
     throw new AuthError(
-      'API key is invalid, revoked, or expired. Run `npx @insforge/cli login --user-api-key <new-key>` again.'
+      'API key is invalid, revoked, or expired. Run `npx @yarahdev/cli login --user-api-key <new-key>` again.'
     );
   }
 
@@ -89,7 +89,7 @@ export async function refreshAccessToken(apiUrl?: string): Promise<string> {
   }
 
   if (!creds.refresh_token) {
-    throw new AuthError('Refresh token not found. Run `npx @insforge/cli login` again.');
+    throw new AuthError('Refresh token not found. Run `npx @yarahdev/cli login` again.');
   }
 
   const config = getGlobalConfig();
@@ -117,6 +117,6 @@ export async function refreshAccessToken(apiUrl?: string): Promise<string> {
       const newCreds = await performOAuthLogin(apiUrl);
       return newCreds.access_token;
     }
-    throw new AuthError('Failed to refresh token. Run `npx @insforge/cli login` again.');
+    throw new AuthError('Failed to refresh token. Run `npx @yarahdev/cli login` again.');
   }
 }

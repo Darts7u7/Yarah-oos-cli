@@ -13,14 +13,14 @@ export class CLIError extends Error {
 }
 
 export class AuthError extends CLIError {
-  constructor(message: string = 'Not authenticated. Run `npx @insforge/cli login` first.') {
+  constructor(message: string = 'Not authenticated. Run `npx @yarahdev/cli login` first.') {
     super(message, 2, 'AUTH_ERROR');
   }
 }
 
 export class ProjectNotLinkedError extends CLIError {
   constructor() {
-    super('No project linked. Run `npx @insforge/cli link` first.', 3, 'PROJECT_NOT_LINKED');
+    super('No project linked. Run `npx @yarahdev/cli link` first.', 3, 'PROJECT_NOT_LINKED');
   }
 }
 

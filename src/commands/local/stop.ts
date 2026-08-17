@@ -23,7 +23,7 @@ interface StopOptions {
 
 /** Put a cloud link that `local start` displaced back in place. */
 function restoreCloudLink(): string | null {
-  const backup = join(process.cwd(), '.insforge', 'project.cloud.json');
+  const backup = join(process.cwd(), '.yarah', 'project.cloud.json');
   if (!existsSync(backup)) return null;
   copyFileSync(backup, getProjectConfigFile());
   unlinkSync(backup);
@@ -33,7 +33,7 @@ function restoreCloudLink(): string | null {
 export function registerLocalStopCommand(localCmd: Command): void {
   localCmd
     .command('stop')
-    .description('Stop the local InsForge backend for this directory (data is kept)')
+    .description('Stop the local Yarah backend for this directory (data is kept)')
     .option('--delete-data', 'Also remove the volumes — database, storage, and logs are destroyed')
     .option('--unlink', 'Restore the cloud project link this directory had before `local start`')
     .action(async (opts: StopOptions, cmd: Command) => {
@@ -45,7 +45,7 @@ export function registerLocalStopCommand(localCmd: Command): void {
         if (!state) {
           throw new CLIError(
             'No local instance is recorded for this directory.\n' +
-              'Run `insforge local start` here first, or `docker ps` to find instances started elsewhere.',
+              'Run `yarah local start` here first, or `docker ps` to find instances started elsewhere.',
           );
         }
 
@@ -67,7 +67,7 @@ export function registerLocalStopCommand(localCmd: Command): void {
           if (!opts.deleteData) {
             throw new CLIError(
               `${checkoutEnvFile()} is missing, so the stack cannot be stopped cleanly.\n\n` +
-                'Restore it from a backup, or run `insforge local stop --delete-data`\n' +
+                'Restore it from a backup, or run `yarah local stop --delete-data`\n' +
                 'to remove the containers and their data outright.',
             );
           }
@@ -115,7 +115,7 @@ export function registerLocalStopCommand(localCmd: Command): void {
               `${remainingVolumes.length === 1 ? '' : 's'} could not be removed:\n` +
               remainingVolumes.map((v) => `  • ${v}`).join('\n') +
               (sweepError ? `\n\n${sweepError}` : '') +
-              '\n\nThis directory still points at them, so `insforge local stop --delete-data`\n' +
+              '\n\nThis directory still points at them, so `yarah local stop --delete-data`\n' +
               'will try again once whatever is holding them is gone.',
           );
         }
@@ -134,12 +134,12 @@ export function registerLocalStopCommand(localCmd: Command): void {
 
         outputSuccess(
           opts.deleteData
-            ? 'Local InsForge stopped and all data removed.' +
+            ? 'Local Yarah stopped and all data removed.' +
                 (sweptVolumes.length > 0
                   ? `
   Also swept ${sweptVolumes.length} volume${sweptVolumes.length === 1 ? '' : 's'} that \`compose down -v\` did not remove.`
                   : '')
-            : 'Local InsForge stopped. Data is kept — `insforge local start` resumes it.',
+            : 'Local Yarah stopped. Data is kept — `yarah local start` resumes it.',
         );
         if (restored) {
           clack.log.info(`Restored the cloud link to "${restored}".`);

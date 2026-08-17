@@ -2,7 +2,7 @@ import type { Command } from "commander";
 import type {
   GetRazorpayWebhookSetupResponse,
   PaymentProvider,
-} from "@insforge/shared-schemas";
+} from "@yarahdev/shared-schemas";
 import * as prompts from "../../lib/prompts.js";
 import {
   configureStripeWebhook,

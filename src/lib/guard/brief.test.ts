@@ -15,7 +15,7 @@ const criticalRisk: RiskAssessment = {
 };
 
 const noAgent: AgentBrief = { reason: null, impact: null, recommendation: null };
-const cmd = 'npx @insforge/cli db query "DROP TABLE users"';
+const cmd = 'npx @yarahdev/cli db query "DROP TABLE users"';
 
 describe('buildBrief — defaults (no live, no agent)', () => {
   const b = buildBrief(ctx, criticalRisk, cmd, noAgent);

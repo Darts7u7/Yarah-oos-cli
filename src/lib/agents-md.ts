@@ -4,25 +4,25 @@ import * as clack from '@clack/prompts';
 import type { ProjectConfig } from '../types.js';
 import { getProjectConfig } from './config.js';
 
-// HTML-comment markers delimit the InsForge-managed section so we can refresh it
+// HTML-comment markers delimit the Yarah-managed section so we can refresh it
 // in place on re-link instead of appending a duplicate every run. Anything
 // outside the markers is the user's own content and is never touched.
-export const AGENTS_MD_START = '<!-- INSFORGE:START -->';
-export const AGENTS_MD_END = '<!-- INSFORGE:END -->';
+export const AGENTS_MD_START = '<!-- YARAH:START -->';
+export const AGENTS_MD_END = '<!-- YARAH:END -->';
 
 /**
- * Builds the InsForge-managed block for AGENTS.md (markers included).
+ * Builds the Yarah-managed block for AGENTS.md (markers included).
  *
  * Contains no secrets: AGENTS.md follows the open agents.md standard and is
  * meant to be committed and shared, so only the project name and the (already
  * public) API host are embedded, never the api_key.
  */
-export function buildInsforgeBlock(config: ProjectConfig | null): string {
+export function buildYarahBlock(config: ProjectConfig | null): string {
   const lines: string[] = [
     AGENTS_MD_START,
-    '## InsForge backend',
+    '## Yarah backend',
     '',
-    'This project uses [InsForge](https://insforge.dev): an all-in-one, open-source Postgres-based backend (BaaS) that gives this app a database, authentication, file storage, edge functions, realtime, an AI model gateway, and payments through one platform.',
+    'This project uses [Yarah](https://yarah.dev): an all-in-one, open-source Postgres-based backend (BaaS) that gives this app a database, authentication, file storage, edge functions, realtime, an AI model gateway, and payments through one platform.',
     '',
   ];
 
@@ -33,13 +33,13 @@ export function buildInsforgeBlock(config: ProjectConfig | null): string {
   }
 
   lines.push(
-    '- **Skills:** these InsForge skills are installed for supported coding agents. Reach for them before implementing any InsForge feature instead of guessing the API:',
-    '  - `insforge`: app code with the `@insforge/sdk` client (database CRUD, auth, storage, edge functions, realtime, AI, email, and Stripe payments).',
-    '  - `insforge-cli`: backend and infrastructure via the `insforge` CLI (projects, SQL, migrations, RLS policies, storage buckets, functions, secrets, payment setup, schedules, deploys).',
-    '  - `insforge-debug`: diagnosing failures (SDK/HTTP errors, RLS denials, auth and OAuth issues) and running security or performance audits.',
-    '  - `insforge-integrations`: wiring external auth providers (Clerk, Auth0, WorkOS, Better Auth, etc.) for JWT-based RLS, or the OKX x402 payment facilitator.',
+    '- **Skills:** these Yarah skills are installed for supported coding agents. Reach for them before implementing any Yarah feature instead of guessing the API:',
+    '  - `yarah`: app code with the `@yarahdev/sdk` client (database CRUD, auth, storage, edge functions, realtime, AI, email, and Stripe payments).',
+    '  - `yarah-cli`: backend and infrastructure via the `yarah` CLI (projects, SQL, migrations, RLS policies, storage buckets, functions, secrets, payment setup, schedules, deploys).',
+    '  - `yarah-debug`: diagnosing failures (SDK/HTTP errors, RLS denials, auth and OAuth issues) and running security or performance audits.',
+    '  - `yarah-integrations`: wiring external auth providers (Clerk, Auth0, WorkOS, Better Auth, etc.) for JWT-based RLS, or the OKX x402 payment facilitator.',
     '  - `find-skills`: discovering additional skills on demand.',
-    '- **Credentials:** app code reads keys from `.env.local`; the CLI reads `.insforge/project.json`. Never hardcode or commit keys.',
+    '- **Credentials:** app code reads keys from `.env.local`; the CLI reads `.yarah/project.json`. Never hardcode or commit keys.',
     '',
     'Key patterns:',
     '',
@@ -53,7 +53,7 @@ export function buildInsforgeBlock(config: ProjectConfig | null): string {
 }
 
 /**
- * Pure merge of the InsForge block into AGENTS.md content.
+ * Pure merge of the Yarah block into AGENTS.md content.
  *
  * - No existing file (or blank): create one with a top-level heading.
  * - Existing file with our markers: replace the block in place (idempotent,
@@ -62,7 +62,7 @@ export function buildInsforgeBlock(config: ProjectConfig | null): string {
  *   own content above it.
  */
 export function mergeAgentsMd(existing: string | null, config: ProjectConfig | null): string {
-  const block = buildInsforgeBlock(config);
+  const block = buildYarahBlock(config);
 
   if (existing === null || existing.trim() === '') {
     return `# AGENTS.md\n\n${block}\n`;
@@ -82,13 +82,13 @@ export function mergeAgentsMd(existing: string | null, config: ProjectConfig | n
     return `${before}${block}${after}`;
   }
 
-  // No InsForge block yet — append it, separated by a blank line.
+  // No Yarah block yet — append it, separated by a blank line.
   return `${existing.replace(/\s+$/, '')}\n\n${block}\n`;
 }
 
 /**
- * Writes (or refreshes) the InsForge section of `AGENTS.md` in the project
- * directory so bare agent harnesses that read `./AGENTS.md` get InsForge
+ * Writes (or refreshes) the Yarah section of `AGENTS.md` in the project
+ * directory so bare agent harnesses that read `./AGENTS.md` get Yarah
  * context. Unlike the per-agent skill directories, AGENTS.md is left out of
  * .gitignore so it can be committed and shared with the team.
  *
@@ -111,8 +111,8 @@ export function writeLocalAgentsMd(
   if (!json) {
     clack.log.success(
       existed
-        ? 'Updated AGENTS.md with InsForge guidance.'
-        : 'Created AGENTS.md with InsForge guidance.',
+        ? 'Updated AGENTS.md with Yarah guidance.'
+        : 'Created AGENTS.md with Yarah guidance.',
     );
   }
 }

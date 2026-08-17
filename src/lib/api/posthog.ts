@@ -114,7 +114,7 @@ export async function readOssPosthogConnection(): Promise<PosthogConnectionRespo
  * GET /integrations/posthog/v1/connection?project_id=<id>
  *
  * Endpoint is owned by cloud-backend (added in parallel under the same plan).
- * Uses user-level Bearer auth from `insforge login` rather than the project
+ * Uses user-level Bearer auth from `yarah login` rather than the project
  * JWT — cloud-backend enforces a membership check on the project.
  *
  * The response shape per spec §7 is:
@@ -238,7 +238,7 @@ export async function pollPosthogConnection(
     const elapsed = Date.now() - start;
     if (elapsed >= opts.timeoutMs) {
       throw new CLIError(
-        'Timed out waiting for PostHog connection. Re-run `insforge posthog setup` after authorizing.',
+        'Timed out waiting for PostHog connection. Re-run `yarah posthog setup` after authorizing.',
       );
     }
     opts.onTick?.(elapsed);
@@ -277,7 +277,7 @@ export type PosthogCliStartResponse =
  * Asks cloud-backend whether this project is already connected (or can be
  * inline auto-provisioned for new users) — in which case we skip the browser
  * hop entirely. Otherwise returns a direct PostHog `authorizeUrl` that the
- * user must consent at; the URL points straight at posthog.com (no Insforge
+ * user must consent at; the URL points straight at posthog.com (no Yarah
  * dashboard in the path).
  */
 export async function startPosthogCliFlow(
@@ -305,7 +305,7 @@ export async function startPosthogCliFlow(
     const body = (await res.json().catch(() => ({}))) as { error?: string };
     const msg = body.error ?? res.statusText ?? `HTTP ${res.status}`;
     if (res.status === 401) {
-      throw new CLIError(`Not authenticated (HTTP 401): ${msg}. Re-run \`insforge login\`.`);
+      throw new CLIError(`Not authenticated (HTTP 401): ${msg}. Re-run \`yarah login\`.`);
     }
     if (res.status === 403) {
       throw new CLIError(`Forbidden (HTTP 403): ${msg}`, 5);

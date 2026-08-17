@@ -14,7 +14,7 @@ import type {
   CreateStripeProductBody,
   ListStripeProductsResponse,
   UpdateStripeProductBody,
-} from "@insforge/shared-schemas";
+} from "@yarahdev/shared-schemas";
 import {
   formatAmount,
   formatDate,

@@ -1,5 +1,5 @@
 import type { Command } from 'commander';
-import type { AppMetadataSchema } from '@insforge/shared-schemas';
+import type { AppMetadataSchema } from '@yarahdev/shared-schemas';
 import { ossFetch } from '../lib/api/oss.js';
 import { requireAuth } from '../lib/credentials.js';
 import { handleError, getRootOpts } from '../lib/errors.js';

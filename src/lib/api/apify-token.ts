@@ -2,7 +2,7 @@ import { ossFetch } from './oss.js';
 import { CLIError } from '../errors.js';
 
 /**
- * Fetch the Apify access token that InsForge holds on behalf of the user.
+ * Fetch the Apify access token that Yarah holds on behalf of the user.
  *
  * Calls GET /api/webscraper/apify/token on the project's OSS host using the
  * admin `ik_` key (via ossFetch). Returns the token string on success.
@@ -25,7 +25,7 @@ export async function fetchApifyAccessToken(): Promise<string> {
     // rather than wrongly telling the user to run `connect`.
     if (err instanceof CLIError && err.statusCode === 404 && err.code === 'not_connected') {
       throw new CLIError(
-        'Apify is not connected. Run `insforge webscraper apify connect` first.',
+        'Apify is not connected. Run `yarah webscraper apify connect` first.',
         1,
         'APIFY_NOT_CONNECTED',
         404,

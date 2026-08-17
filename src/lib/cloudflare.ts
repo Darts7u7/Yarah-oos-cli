@@ -19,7 +19,7 @@ const CLOUDFLARE_OAUTH_SCOPES = [
   'zone.read',
   'account-settings.read',
 ];
-const GLOBAL_DIR = join(homedir(), '.insforge');
+const GLOBAL_DIR = join(homedir(), '.yarah');
 const CLOUDFLARE_FILE = join(GLOBAL_DIR, 'cloudflare.json');
 
 export interface CloudflareCredentials {
@@ -121,7 +121,7 @@ function base64url(buffer: Buffer): string {
 }
 
 function getCloudflareOAuthClientId(): string {
-  return process.env.INSFORGE_CLOUDFLARE_OAUTH_CLIENT_ID ?? CLOUDFLARE_OAUTH_CLIENT_ID;
+  return process.env.YARAH_CLOUDFLARE_OAUTH_CLIENT_ID ?? CLOUDFLARE_OAUTH_CLIENT_ID;
 }
 
 function generatePkce(): { codeVerifier: string; codeChallenge: string } {
@@ -361,7 +361,7 @@ export async function requireCloudflareCredentials(): Promise<CloudflareCredenti
   const creds = getCloudflareCredentials();
   if (!creds) {
     throw new CLIError(
-      'Cloudflare is not connected. Run `npx @insforge/cli domains cloudflare login` or set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_ACCESS_TOKEN.',
+      'Cloudflare is not connected. Run `npx @yarahdev/cli domains cloudflare login` or set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_ACCESS_TOKEN.',
       2,
       'CLOUDFLARE_AUTH_REQUIRED',
     );

@@ -121,7 +121,7 @@ beforeEach(() => {
   nextStorageConfigResponse = undefined;
   nextRealtimeConfigResponse = undefined;
   nextSchedulesConfigResponse = undefined;
-  tmp = mkdtempSync(join(tmpdir(), 'insforge-apply-test-'));
+  tmp = mkdtempSync(join(tmpdir(), 'yarah-apply-test-'));
 });
 
 describe('config apply (capability probe)', () => {
@@ -129,7 +129,7 @@ describe('config apply (capability probe)', () => {
     nextMetadataResponse = {
       auth: { allowedRedirectUrls: ['https://old.com'] },
     };
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(
       tomlPath,
       '[auth]\nallowed_redirect_urls = ["https://new.com", "https://old.com"]\n',
@@ -162,7 +162,7 @@ describe('config apply (capability probe)', () => {
   it('skips changes (and never PUTs) when the backend omits the field', async () => {
     // Legacy backend: auth slice exists but no allowedRedirectUrls field.
     nextMetadataResponse = { auth: { someOtherField: 'x' } };
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(tomlPath, '[auth]\nallowed_redirect_urls = ["https://new.com"]\n');
 
     const program = makeProgram();
@@ -192,7 +192,7 @@ describe('config apply (capability probe)', () => {
 
   it('treats an empty array on the wire as supported (empty != absent)', async () => {
     nextMetadataResponse = { auth: { allowedRedirectUrls: [] } };
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(tomlPath, '[auth]\nallowed_redirect_urls = ["https://new.com"]\n');
 
     const program = makeProgram();
@@ -217,7 +217,7 @@ describe('config apply (capability probe)', () => {
     nextStorageConfigResponse = new CLIError('NOT_FOUND', 1, 'NOT_FOUND', 404);
     nextRealtimeConfigResponse = new CLIError('OSS request failed: 404', 1, undefined, 404);
     nextSchedulesConfigResponse = new CLIError('NOT_FOUND', 1, 'NOT_FOUND', 404);
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(tomlPath, '[auth]\nallowed_redirect_urls = ["https://new.com"]\n');
 
     const program = makeProgram();
@@ -244,7 +244,7 @@ describe('config apply (capability probe)', () => {
 describe('config apply — additional config sections', () => {
   it('applies auth.disable_signup through /api/auth/config', async () => {
     nextMetadataResponse = { auth: { disableSignup: false } };
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(tomlPath, '[auth]\ndisable_signup = true\n');
 
     const program = makeProgram();
@@ -276,7 +276,7 @@ describe('config apply — additional config sections', () => {
     nextRealtimeConfigResponse = { retentionDays: 7 };
     nextSchedulesConfigResponse = { retentionDays: null };
 
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(
       tomlPath,
       `[storage]
@@ -324,7 +324,7 @@ retention_days = 14
 
   it('skips storage config when the optional endpoint shape is unavailable', async () => {
     nextMetadataResponse = { auth: {} };
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(tomlPath, '[storage]\nmax_file_size_mb = 100\n');
 
     const program = makeProgram();
@@ -355,7 +355,7 @@ retention_days = 14
   it('skips storage config when the optional endpoint is a route-level 404', async () => {
     nextMetadataResponse = { auth: {} };
     nextStorageConfigResponse = new CLIError('NOT_FOUND', 1, 'NOT_FOUND', 404);
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(tomlPath, '[storage]\nmax_file_size_mb = 100\n');
 
     const program = makeProgram();
@@ -386,7 +386,7 @@ retention_days = 14
       'STORAGE_CONFIG_NOT_FOUND',
       404,
     );
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(tomlPath, '[storage]\nmax_file_size_mb = 100\n');
 
     const program = makeProgram();
@@ -416,7 +416,7 @@ describe('config apply — auth.smtp', () => {
     };
     secretsStore.set('SMTP_PASSWORD', 'real-secret-from-store');
 
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(
       tomlPath,
       `[auth.smtp]
@@ -469,7 +469,7 @@ min_interval_seconds = 60
       auth: { allowedRedirectUrls: [], smtpConfig: EMPTY_SMTP_METADATA },
     };
 
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(
       tomlPath,
       `[auth.smtp]
@@ -509,7 +509,7 @@ sender_name = "App"
       },
     };
 
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(
       tomlPath,
       `[auth.smtp]
@@ -555,7 +555,7 @@ min_interval_seconds = 60
   it('skips SMTP changes when the backend predates the smtpConfig metadata field', async () => {
     nextMetadataResponse = { auth: { allowedRedirectUrls: [] } };
 
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(
       tomlPath,
       `[auth.smtp]
@@ -598,7 +598,7 @@ describe('config apply — deployments.subdomain', () => {
       auth: { allowedRedirectUrls: [] },
       deployments: { customSlug: null },
     };
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(tomlPath, '[deployments]\nsubdomain = "my-app"\n');
 
     const program = makeProgram();
@@ -629,7 +629,7 @@ describe('config apply — deployments.subdomain', () => {
       auth: { allowedRedirectUrls: [] },
       deployments: { customSlug: 'existing-slug' },
     };
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(tomlPath, '[deployments]\nsubdomain = ""\n');
 
     const program = makeProgram();
@@ -659,7 +659,7 @@ describe('config apply — deployments.subdomain', () => {
       auth: { allowedRedirectUrls: [] },
       deployments: { customSlug: 'my-app' },
     };
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(tomlPath, '[deployments]\nsubdomain = "my-app"\n');
 
     const program = makeProgram();
@@ -691,7 +691,7 @@ describe('config apply — deployments.subdomain', () => {
     // environment"), and on a pre-#1259 backend the metadata round-trip
     // wouldn't have detected our intent at all.
     nextMetadataResponse = { auth: { allowedRedirectUrls: [] } };
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(tomlPath, '[deployments]\nsubdomain = "my-app"\n');
 
     const program = makeProgram();

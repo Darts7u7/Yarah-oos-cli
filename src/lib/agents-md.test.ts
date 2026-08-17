@@ -6,7 +6,7 @@ import type { ProjectConfig } from '../types.js';
 import {
   AGENTS_MD_END,
   AGENTS_MD_START,
-  buildInsforgeBlock,
+  buildYarahBlock,
   mergeAgentsMd,
   writeLocalAgentsMd,
 } from './agents-md.js';
@@ -18,60 +18,60 @@ const config: ProjectConfig = {
   appkey: 'abc',
   region: 'us-east',
   api_key: 'super-secret-key-xyz',
-  oss_host: 'https://abc.us-east.insforge.app',
+  oss_host: 'https://abc.us-east.apps.yarah.dev',
 };
 
-describe('buildInsforgeBlock', () => {
-  it('wraps content in the InsForge markers', () => {
-    const block = buildInsforgeBlock(null);
+describe('buildYarahBlock', () => {
+  it('wraps content in the Yarah markers', () => {
+    const block = buildYarahBlock(null);
     expect(block.startsWith(AGENTS_MD_START)).toBe(true);
     expect(block.trimEnd().endsWith(AGENTS_MD_END)).toBe(true);
   });
 
-  it('explains what InsForge is', () => {
-    const block = buildInsforgeBlock(null);
-    expect(block).toContain('InsForge');
+  it('explains what Yarah is', () => {
+    const block = buildYarahBlock(null);
+    expect(block).toContain('Yarah');
     expect(block.toLowerCase()).toContain('backend');
   });
 
   it('tells the agent when to use the installed skills', () => {
-    const block = buildInsforgeBlock(null);
+    const block = buildYarahBlock(null);
     expect(block.toLowerCase()).toContain('skill');
     expect(block.toLowerCase()).toContain('before implementing');
   });
 
   it('names the specific skills the CLI installs', () => {
-    const block = buildInsforgeBlock(null);
+    const block = buildYarahBlock(null);
     for (const skill of [
-      '`insforge`',
-      '`insforge-cli`',
-      '`insforge-debug`',
-      '`insforge-integrations`',
+      '`yarah`',
+      '`yarah-cli`',
+      '`yarah-debug`',
+      '`yarah-integrations`',
       '`find-skills`',
     ]) {
       expect(block).toContain(skill);
     }
   });
 
-  it('does not recommend the `insforge docs` command', () => {
-    expect(buildInsforgeBlock(null)).not.toContain('insforge docs');
+  it('does not recommend the `yarah docs` command', () => {
+    expect(buildYarahBlock(null)).not.toContain('yarah docs');
   });
 
   it('includes the high-leverage correctness patterns', () => {
-    const block = buildInsforgeBlock(null);
+    const block = buildYarahBlock(null);
     expect(block).toContain('insert([{');
     expect(block).toContain('auth.users(id)');
     expect(block).toContain('auth.uid()');
   });
 
   it('includes project name and API host when config is present', () => {
-    const block = buildInsforgeBlock(config);
+    const block = buildYarahBlock(config);
     expect(block).toContain('My App');
-    expect(block).toContain('https://abc.us-east.insforge.app');
+    expect(block).toContain('https://abc.us-east.apps.yarah.dev');
   });
 
   it('never leaks the api_key (the file is committed)', () => {
-    expect(buildInsforgeBlock(config)).not.toContain('super-secret-key-xyz');
+    expect(buildYarahBlock(config)).not.toContain('super-secret-key-xyz');
   });
 });
 
@@ -90,18 +90,18 @@ describe('mergeAgentsMd', () => {
     expect(out.indexOf('Always write tests.')).toBeLessThan(out.indexOf(AGENTS_MD_START));
   });
 
-  it('replaces an existing InsForge block in place (no duplication)', () => {
+  it('replaces an existing Yarah block in place (no duplication)', () => {
     const first = mergeAgentsMd('# My rules\n\nKeep it.\n', config);
     const second = mergeAgentsMd(first, config);
     expect(second).toBe(first); // idempotent
-    expect(second.match(/INSFORGE:START/g)).toHaveLength(1);
+    expect(second.match(/YARAH:START/g)).toHaveLength(1);
     expect(second).toContain('Keep it.');
   });
 
   it('refreshes the block when config changes without growing the file', () => {
     const first = mergeAgentsMd(null, null);
     const refreshed = mergeAgentsMd(first, config);
-    expect(refreshed.match(/INSFORGE:START/g)).toHaveLength(1);
+    expect(refreshed.match(/YARAH:START/g)).toHaveLength(1);
     expect(refreshed).toContain('My App');
   });
 
@@ -114,10 +114,10 @@ describe('mergeAgentsMd', () => {
     // User corrupts the managed block by removing only its END marker, leaving
     // an orphaned START. A rerun must replace from START to EOF, not append a
     // second block (which a later run could use to eat content between blocks).
-    const corrupted = `# Mine\n\n${AGENTS_MD_START}\nstale insforge block, end marker gone\n`;
+    const corrupted = `# Mine\n\n${AGENTS_MD_START}\nstale yarah block, end marker gone\n`;
     const first = mergeAgentsMd(corrupted, config);
     const second = mergeAgentsMd(first, config);
-    expect(first.match(/INSFORGE:START/g)).toHaveLength(1);
+    expect(first.match(/YARAH:START/g)).toHaveLength(1);
     expect(first).toContain(AGENTS_MD_END);
     expect(first).toContain('# Mine');
     expect(second).toBe(first); // idempotent after recovery
@@ -137,7 +137,7 @@ describe('mergeAgentsMd', () => {
     const first = mergeAgentsMd(`${userPrefix}placeholder\n`, config);
     const second = mergeAgentsMd(first, config);
     expect(second).toBe(first); // idempotent
-    expect(second.match(/INSFORGE:START/g)).toHaveLength(1);
+    expect(second.match(/YARAH:START/g)).toHaveLength(1);
     expect(second).toContain('Do not edit');
   });
 });
@@ -166,7 +166,7 @@ describe('writeLocalAgentsMd', () => {
     expect(second).toBe(first);
   });
 
-  it('preserves a pre-existing AGENTS.md and appends the InsForge block', () => {
+  it('preserves a pre-existing AGENTS.md and appends the Yarah block', () => {
     const p = join(dir, 'AGENTS.md');
     writeFileSync(p, '# Existing\n\nUser instructions here.\n');
     writeLocalAgentsMd(true, { cwd: dir, config });

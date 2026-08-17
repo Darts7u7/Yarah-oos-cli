@@ -4,22 +4,22 @@ import { handleError, getRootOpts } from '../../../lib/errors.js';
 import { runApifyAuthBridge } from '../../../lib/apify-bridge.js';
 
 /**
- * `insforge webscraper apify login`
+ * `yarah webscraper apify login`
  *
- * Auth bridge: fetches the InsForge-managed Apify token, ensures the Apify CLI
+ * Auth bridge: fetches the Yarah-managed Apify token, ensures the Apify CLI
  * is installed, runs `apify login --token <token>` (headless, no browser), and
  * installs apify/agent-skills so the local coding agent is immediately
  * Apify-ready.
  *
  * HARD REQUIREMENT: always `apify login --token`; never `apify login`
  * (which would open browser OAuth). On Apify 401 the user should re-run this
- * command — InsForge re-fetches a fresh token automatically.
+ * command — Yarah re-fetches a fresh token automatically.
  */
 export function registerApifyLoginCommand(program: Command): void {
   program
     .command('login')
     .description(
-      'Authenticate the local Apify CLI/agent using your InsForge-managed token (no browser)',
+      'Authenticate the local Apify CLI/agent using your Yarah-managed token (no browser)',
     )
     .action(async (_opts, cmd) => {
       const { json } = getRootOpts(cmd);
@@ -33,7 +33,7 @@ export function registerApifyLoginCommand(program: Command): void {
           } else {
             clack.log.success('Apify CLI authenticated.');
             clack.log.warn(
-              'Agent skills did not install. Re-run `insforge webscraper apify login`, or install manually with `npx skills add apify/agent-skills`.',
+              'Agent skills did not install. Re-run `yarah webscraper apify login`, or install manually with `npx skills add apify/agent-skills`.',
             );
           }
         }

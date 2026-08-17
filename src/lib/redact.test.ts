@@ -50,8 +50,8 @@ describe('redactSensitive', () => {
   });
 
   it('redacts credentials embedded in connection strings', () => {
-    expect(redactSensitive('postgres://admin:s3cret@db.insforge.dev:5432/app')).toBe(
-      'postgres://[REDACTED_CREDENTIALS]@db.insforge.dev:5432/app',
+    expect(redactSensitive('postgres://admin:s3cret@db.yarah.dev:5432/app')).toBe(
+      'postgres://[REDACTED_CREDENTIALS]@db.yarah.dev:5432/app',
     );
   });
 
@@ -83,7 +83,7 @@ describe('redactSensitive', () => {
 
   it('leaves ordinary prose untouched', () => {
     const text =
-      'insforge db policies create returns 500 when the table name contains uppercase letters';
+      'yarah db policies create returns 500 when the table name contains uppercase letters';
     expect(redactSensitive(text)).toBe(text);
   });
 });

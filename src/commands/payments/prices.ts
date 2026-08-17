@@ -15,7 +15,7 @@ import type {
   StripePriceRecurringInterval,
   StripePriceTaxBehavior,
   UpdateStripePriceBody,
-} from "@insforge/shared-schemas";
+} from "@yarahdev/shared-schemas";
 import {
   formatAmount,
   formatDate,

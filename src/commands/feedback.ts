@@ -102,12 +102,12 @@ async function promptMissing(fields: RequiredFields): Promise<RequiredFields> {
 
   if (!component) {
     const picked = await prompts.select<FeedbackComponent>({
-      message: 'Where in the InsForge toolkit is the issue?',
+      message: 'Where in the Yarah toolkit is the issue?',
       options: [
-        { value: 'backend', label: 'Backend', hint: 'the InsForge platform / hosted services' },
-        { value: 'sdk', label: 'SDK', hint: '@insforge/sdk or another language SDK' },
-        { value: 'cli', label: 'CLI', hint: '@insforge/cli itself' },
-        { value: 'skills', label: 'Agent skills', hint: 'insforge / insforge-cli skill content' },
+        { value: 'backend', label: 'Backend', hint: 'the Yarah platform / hosted services' },
+        { value: 'sdk', label: 'SDK', hint: '@yarahdev/sdk or another language SDK' },
+        { value: 'cli', label: 'CLI', hint: '@yarahdev/cli itself' },
+        { value: 'skills', label: 'Agent skills', hint: 'yarah / yarah-cli skill content' },
         { value: 'docs', label: 'Docs', hint: 'documentation site or `docs` command content' },
         { value: 'other', label: 'Other' },
       ],
@@ -150,9 +150,9 @@ export function registerFeedbackCommand(program: Command): void {
   program
     .command('feedback')
     .description(
-      'Report an InsForge-side hurdle — a bug (including docs-vs-behavior discrepancies), a missing ' +
-      'capability, or DX friction — to the InsForge team. For agents: use this whenever any part of ' +
-      'the InsForge toolkit (backend, an SDK, the CLI, agent skills, docs) got in your way — not the ' +
+      'Report an Yarah-side hurdle — a bug (including docs-vs-behavior discrepancies), a missing ' +
+      'capability, or DX friction — to the Yarah team. For agents: use this whenever any part of ' +
+      'the Yarah toolkit (backend, an SDK, the CLI, agent skills, docs) got in your way — not the ' +
       'app you are building. Emails, tokens, keys, and usernames are redacted locally before submission.',
     )
     .option('--type <type>', 'Hurdle kind: bug (should work per contract or docs, but does not) | feature-request (needed something unsupported) | friction (works but confusing/awkward) | other')
@@ -192,7 +192,7 @@ export function registerFeedbackCommand(program: Command): void {
         }
         if (!component || !(COMPONENTS as readonly string[]).includes(component)) {
           throw new CLIError(
-            `--component is required and must be one of: ${COMPONENTS.join(', ')} — where in the InsForge toolkit the issue lives.`,
+            `--component is required and must be one of: ${COMPONENTS.join(', ')} — where in the Yarah toolkit the issue lives.`,
           );
         }
         if (component === 'sdk' && !language?.trim()) {
@@ -226,7 +226,7 @@ export function registerFeedbackCommand(program: Command): void {
           expected: cleanOptional(opts.expected, LIMITS.expected),
           workaround: cleanOptional(opts.workaround, LIMITS.workaround),
           doc_ref: cleanOptional(opts.doc, LIMITS.doc),
-          // Platform identifiers InsForge already holds — context, not PII.
+          // Platform identifiers Yarah already holds — context, not PII.
           project_id: !ossMode ? config?.project_id : undefined,
           org_id: !ossMode ? config?.org_id : undefined,
           region: !ossMode ? config?.region : undefined,

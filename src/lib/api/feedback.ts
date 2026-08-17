@@ -1,8 +1,8 @@
 import { CLIError, formatFetchError } from '../errors.js';
 
 /**
- * The InsForge-hosted feedback project (dogfooding: InsForge stores its own
- * product feedback on InsForge). Both values below are public client
+ * The Yarah-hosted feedback project (dogfooding: Yarah stores its own
+ * product feedback on Yarah). Both values below are public client
  * credentials by design: the anon key can only invoke the submit-feedback
  * edge function — the feedback table is RLS-locked with zero anon policies,
  * and the function enforces validation, per-IP rate limiting, and duplicate
@@ -14,10 +14,10 @@ import { CLIError, formatFetchError } from '../errors.js';
  * testing and emergency rotation.
  */
 const FEEDBACK_ENDPOINT =
-  process.env.INSFORGE_FEEDBACK_URL ||
-  'https://3yzf3pzs.us-east.insforge.app/functions/submit-feedback';
+  process.env.YARAH_FEEDBACK_URL ||
+  'https://3yzf3pzs.us-east.apps.yarah.dev/functions/submit-feedback';
 const FEEDBACK_ANON_KEY =
-  process.env.INSFORGE_FEEDBACK_ANON_KEY ||
+  process.env.YARAH_FEEDBACK_ANON_KEY ||
   'anon_d6bd647caa3988037271f3e00661c014c12c3a8be6a01f66c6efa30afe03d0f8';
 
 // Feedback is a side quest — never let a hung endpoint hang the CLI.
@@ -31,7 +31,7 @@ export interface FeedbackPayload {
    * but confusing/awkward).
    */
   type: 'bug' | 'feature-request' | 'friction' | 'other';
-  /** Which part of the InsForge toolkit the issue lives in. */
+  /** Which part of the Yarah toolkit the issue lives in. */
   component: 'backend' | 'sdk' | 'cli' | 'skills' | 'docs' | 'other';
   severity: 'blocker' | 'major' | 'minor';
   title: string;
@@ -64,7 +64,7 @@ export interface FeedbackResult {
 
 /**
  * Submit structured product feedback (bug / feature request / friction)
- * to the InsForge team's feedback backend. No login required — the endpoint
+ * to the Yarah team's feedback backend. No login required — the endpoint
  * is public (anon key) so OSS and logged-out users can report too. Free-text
  * fields must already be PII-scrubbed by the caller (see src/lib/redact.ts);
  * the backend re-validates and enforces its own caps.

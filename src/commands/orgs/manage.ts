@@ -191,7 +191,7 @@ export function registerOrgsManageCommands(orgsCmd: Command): void {
         } else {
           outputSuccess(result.message || `Organization ${orgId} deleted.`);
           if (linkedInOrg) {
-            outputInfo('The linked project was deleted with the organization. Run `insforge link` to link a different project.');
+            outputInfo('The linked project was deleted with the organization. Run `yarah link` to link a different project.');
           }
         }
       } catch (err) {

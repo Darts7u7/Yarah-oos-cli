@@ -1,12 +1,12 @@
 node_modules/
 dist/
 *.tsbuildinfo
-.insforge/
+.yarah/
 .env
 .env.*
 
-# InsForge & AI agent skills
-.insforge
+# Yarah & AI agent skills
+.yarah
 .agent
 .agents
 .augment

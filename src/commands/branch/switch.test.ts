@@ -7,9 +7,9 @@ const saveCalls: ProjectConfig[] = [];
 vi.mock('../../lib/config.js', () => ({
   getProjectConfig: vi.fn(),
   saveProjectConfig: vi.fn((c: ProjectConfig) => saveCalls.push(c)),
-  getProjectConfigFile: () => '/tmp/_test_/.insforge/project.json',
-  getParentBackupFile: () => '/tmp/_test_/.insforge/project.parent.json',
-  buildOssHost: (appkey: string, region: string) => `https://${appkey}.${region}.insforge.app`,
+  getProjectConfigFile: () => '/tmp/_test_/.yarah/project.json',
+  getParentBackupFile: () => '/tmp/_test_/.yarah/project.parent.json',
+  buildOssHost: (appkey: string, region: string) => `https://${appkey}.${region}.apps.yarah.dev`,
   FAKE_PROJECT_ID: '00000000-0000-0000-0000-000000000000',
 }));
 
@@ -67,20 +67,20 @@ describe('runBranchSwitch', () => {
       appkey: 'p1ky',
       region: 'us-east',
       api_key: 'parent-key',
-      oss_host: 'p1ky.us-east.insforge.app',
+      oss_host: 'p1ky.us-east.apps.yarah.dev',
     });
     fsMock.existsSync.mockReturnValueOnce(false); // parent.json backup absent
     await runBranchSwitch({ name: 'feat-x', apiUrl: undefined, json: true });
     expect(fsMock.copyFileSync).toHaveBeenCalledWith(
-      '/tmp/_test_/.insforge/project.json',
-      '/tmp/_test_/.insforge/project.parent.json',
+      '/tmp/_test_/.yarah/project.json',
+      '/tmp/_test_/.yarah/project.parent.json',
     );
     expect(saveCalls).toHaveLength(1);
     expect(saveCalls[0]).toMatchObject({
       project_id: 'b1',
       project_name: 'feat-x',
       api_key: 'branch-api-key',
-      oss_host: 'https://p1ky-x9p.us-east.insforge.app',
+      oss_host: 'https://p1ky-x9p.us-east.apps.yarah.dev',
       branched_from: { project_id: 'p1', project_name: 'parent' },
     });
   });
@@ -94,7 +94,7 @@ describe('runBranchSwitch', () => {
       appkey: 'p1ky-old',
       region: 'us-east',
       api_key: 'branch-y-key',
-      oss_host: 'p1ky-old.us-east.insforge.app',
+      oss_host: 'p1ky-old.us-east.apps.yarah.dev',
       branched_from: { project_id: 'p1', project_name: 'parent' },
     });
     fsMock.existsSync.mockReturnValueOnce(true); // backup already exists; do not overwrite
@@ -139,11 +139,11 @@ describe('runBranchSwitch', () => {
     fsMock.existsSync.mockReturnValueOnce(true); // backup present
     await runBranchSwitch({ toParent: true, apiUrl: undefined, json: true });
     expect(fsMock.copyFileSync).toHaveBeenCalledWith(
-      '/tmp/_test_/.insforge/project.parent.json',
-      '/tmp/_test_/.insforge/project.json',
+      '/tmp/_test_/.yarah/project.parent.json',
+      '/tmp/_test_/.yarah/project.json',
     );
     expect(fsMock.unlinkSync).toHaveBeenCalledWith(
-      '/tmp/_test_/.insforge/project.parent.json',
+      '/tmp/_test_/.yarah/project.parent.json',
     );
   });
 

@@ -232,7 +232,7 @@ describe('posthog setup', () => {
       expect(apiMock.startPosthogCliFlow).not.toHaveBeenCalled();
     });
 
-    it('bare setup on a cloud link without a login still asks for insforge login', async () => {
+    it('bare setup on a cloud link without a login still asks for yarah login', async () => {
       configMock.getAccessToken.mockReturnValue(null);
 
       const r = await runSetup([]);

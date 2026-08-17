@@ -264,38 +264,38 @@ export async function ossFetch(
     // exist" errors behind a misleading "feature not enabled" message.
     const isRouteLevel404 = !err.error || err.error === 'NOT_FOUND';
     if (res.status === 404 && isRouteLevel404 && path.startsWith('/api/compute')) {
-      message = 'Compute services are not available on this backend.\nSelf-hosted: upgrade your InsForge instance. Cloud: contact your InsForge admin to enable compute.';
+      message = 'Compute services are not available on this backend.\nSelf-hosted: upgrade your Yarah instance. Cloud: contact your Yarah admin to enable compute.';
     }
 
     if (res.status === 404 && isRouteLevel404 && path.startsWith('/api/payments')) {
-      message = 'Payments are not available on this backend.\nSelf-hosted: upgrade your InsForge instance. Cloud/private preview: contact your InsForge admin to enable payments.';
+      message = 'Payments are not available on this backend.\nSelf-hosted: upgrade your Yarah instance. Cloud/private preview: contact your Yarah admin to enable payments.';
     }
 
     if (res.status === 404 && isRouteLevel404 && path === '/api/database/migrations') {
-      message = 'Database migrations are not available on this backend.\nSelf-hosted: upgrade your InsForge instance. Cloud: contact your InsForge admin about database migration support.';
+      message = 'Database migrations are not available on this backend.\nSelf-hosted: upgrade your Yarah instance. Cloud: contact your Yarah admin about database migration support.';
     }
 
     // Exact match only: per-id backup routes 404 for a missing backup id.
     if (res.status === 404 && isRouteLevel404 && path === '/api/database/backups') {
-      message = 'Database backups are not available on this backend.\nSelf-hosted: upgrade your InsForge instance to a version with the backups feature.';
+      message = 'Database backups are not available on this backend.\nSelf-hosted: upgrade your Yarah instance to a version with the backups feature.';
     }
 
     if (res.status === 404 && isRouteLevel404 && path.startsWith('/api/ai')) {
-      message = 'AI Model Gateway setup is not available on this backend.\nUpgrade your InsForge project to a version with Model Gateway support, or keep using the legacy @insforge/sdk AI modules for projects that still rely on the older AI API surface.';
+      message = 'AI Model Gateway setup is not available on this backend.\nUpgrade your Yarah project to a version with Model Gateway support, or keep using the legacy @yarahdev/sdk AI modules for projects that still rely on the older AI API surface.';
     }
 
     if (res.status === 404 && isRouteLevel404 && path.startsWith('/api/memory')) {
-      message = 'Agent memory is not available on this backend.\nSelf-hosted: upgrade your InsForge instance to a version with the memory feature. Cloud: contact your InsForge admin to enable agent memory.';
+      message = 'Agent memory is not available on this backend.\nSelf-hosted: upgrade your Yarah instance to a version with the memory feature. Cloud: contact your Yarah admin to enable agent memory.';
     }
 
     if (res.status === 404 && isRouteLevel404 && path.startsWith('/api/webscraper')) {
-      message = 'The web scraper is not available on this backend.\nUpgrade your InsForge instance to a version with web scraper support, then run `insforge webscraper apify connect --token <token>` to connect your Apify account.';
+      message = 'The web scraper is not available on this backend.\nUpgrade your Yarah instance to a version with web scraper support, then run `yarah webscraper apify connect --token <token>` to connect your Apify account.';
     }
 
     // Excludes per-id suppression routes: deleting a missing suppression 404s
     // with the code NOT_FOUND, which must keep its real message.
     if (res.status === 404 && isRouteLevel404 && path.startsWith('/api/advisor') && !path.startsWith('/api/advisor/suppressions/')) {
-      message = 'Backend Advisor is not available on this backend.\nSelf-hosted: upgrade your InsForge instance. Cloud: update the project to a newer version.';
+      message = 'Backend Advisor is not available on this backend.\nSelf-hosted: upgrade your Yarah instance. Cloud: update the project to a newer version.';
     }
 
     throw new CLIError(message, 1, err.error, res.status);
@@ -305,7 +305,7 @@ export async function ossFetch(
 }
 
 /**
- * Probe an InsForge backend's `/api/health` on an EXPLICIT base URL.
+ * Probe an Yarah backend's `/api/health` on an EXPLICIT base URL.
  *
  * Unlike `ossFetch`, this deliberately does not read the linked project: a
  * freshly created branch is not linked yet, and the whole point is to ask

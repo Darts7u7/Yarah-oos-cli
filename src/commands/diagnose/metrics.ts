@@ -115,7 +115,7 @@ export function registerDiagnoseMetricsCommand(diagnoseCmd: Command): void {
         if (!config) throw new ProjectNotLinkedError();
         if (config.project_id === FAKE_PROJECT_ID) {
           throw new CLIError(
-            'Metrics requires InsForge Platform login. Not available when linked via --api-key.',
+            'Metrics requires Yarah Platform login. Not available when linked via --api-key.',
           );
         }
         trackDiagnose('metrics', config);

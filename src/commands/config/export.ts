@@ -21,8 +21,8 @@ import { getProjectConfig } from '../../lib/config.js';
 export function registerConfigExportCommand(cfg: Command): void {
   cfg
     .command('export')
-    .description('Pull live project config and write insforge.toml')
-    .option('--out <path>', 'output path', 'insforge.toml')
+    .description('Pull live project config and write yarah.toml')
+    .option('--out <path>', 'output path', 'yarah.toml')
     .option('--force', 'overwrite without confirmation')
     .action(async (opts, cmd) => {
       const { json } = getRootOpts(cmd);

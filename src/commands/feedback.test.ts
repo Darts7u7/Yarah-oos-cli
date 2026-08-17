@@ -64,7 +64,7 @@ describe('feedback command', () => {
       '--title', 'db policies create 500s on uppercase table names',
       '--detail', 'Creating an RLS policy on table "Users" returns 500. Lowercase names work.',
       '--area', 'db',
-      '--command', 'insforge db policies create ...',
+      '--command', 'yarah db policies create ...',
       '--severity', 'major',
     ]);
 
@@ -192,8 +192,8 @@ describe('feedback command', () => {
       '--type', 'bug',
       '--component', 'skills',
       '--title', 'skill documents a --wait flag that does not exist',
-      '--detail', 'insforge-cli skill says deployments deploy supports --wait; the CLI rejects it.',
-      '--doc', 'insforge-cli skill, Deployments section',
+      '--detail', 'yarah-cli skill says deployments deploy supports --wait; the CLI rejects it.',
+      '--doc', 'yarah-cli skill, Deployments section',
       '--expected', 'deploy blocks until the deployment finishes',
       '--workaround', 'polled deployments status in a loop instead',
     ]);
@@ -202,7 +202,7 @@ describe('feedback command', () => {
     expect(payload).toMatchObject({
       type: 'bug',
       component: 'skills',
-      doc_ref: 'insforge-cli skill, Deployments section',
+      doc_ref: 'yarah-cli skill, Deployments section',
       workaround: 'polled deployments status in a loop instead',
     });
   });

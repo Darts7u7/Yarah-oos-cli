@@ -3,12 +3,12 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 import type { GlobalConfig, PendingDeviceLogin, ProjectConfig, StoredCredentials } from '../types.js';
 
-const GLOBAL_DIR = join(homedir(), '.insforge');
+const GLOBAL_DIR = join(homedir(), '.yarah');
 const CREDENTIALS_FILE = join(GLOBAL_DIR, 'credentials.json');
 const CONFIG_FILE = join(GLOBAL_DIR, 'config.json');
 
-const DEFAULT_PLATFORM_URL = 'https://api.insforge.dev';
-const DEFAULT_FRONTEND_URL = 'https://insforge.dev';
+const DEFAULT_PLATFORM_URL = 'https://api.yarah.dev';
+const DEFAULT_FRONTEND_URL = 'https://yarah.dev';
 
 /** Sentinel project ID for OSS/self-hosted linking (valid UUID, never matches a real project). */
 export const FAKE_PROJECT_ID = 'fa4e0000-1234-5678-90ab-cd1234567890';
@@ -95,14 +95,14 @@ export function clearCredentials(): void {
 // --- Project Config (local) ---
 
 function getLocalConfigDir(): string {
-  return join(process.cwd(), '.insforge');
+  return join(process.cwd(), '.yarah');
 }
 
 function getLocalConfigFile(): string {
   return join(getLocalConfigDir(), 'project.json');
 }
 
-/** Path to the backup of `.insforge/project.json` written by `branch switch`
+/** Path to the backup of `.yarah/project.json` written by `branch switch`
  *  the first time the directory is moved off the parent project. Restored
  *  by `branch switch --parent`. Exported so switch.ts can manage the file. */
 export function getParentBackupFile(): string {
@@ -157,24 +157,24 @@ export function saveProjectConfig(config: ProjectConfig): void {
  * hostnames with "Failed to parse URL".
  */
 export function buildOssHost(appkey: string, region: string): string {
-  return `https://${appkey}.${region}.insforge.app`;
+  return `https://${appkey}.${region}.apps.yarah.dev`;
 }
 
 // --- Resolved values (env vars > flags > config) ---
 
 export function getPlatformApiUrl(override?: string): string {
-  return process.env.INSFORGE_API_URL ?? override ?? getGlobalConfig().platform_api_url ?? DEFAULT_PLATFORM_URL;
+  return process.env.YARAH_API_URL ?? override ?? getGlobalConfig().platform_api_url ?? DEFAULT_PLATFORM_URL;
 }
 
 export function getFrontendUrl(): string {
-  return process.env.INSFORGE_FRONTEND_URL ?? DEFAULT_FRONTEND_URL;
+  return process.env.YARAH_FRONTEND_URL ?? DEFAULT_FRONTEND_URL;
 }
 
 export function getAccessToken(): string | null {
   // Env override wins and must work even if credentials.json is missing or
   // corrupt — so check it BEFORE reading/parsing the file (getCredentials can
   // throw on malformed JSON).
-  if (process.env.INSFORGE_ACCESS_TOKEN) return process.env.INSFORGE_ACCESS_TOKEN;
+  if (process.env.YARAH_ACCESS_TOKEN) return process.env.YARAH_ACCESS_TOKEN;
   // Then: direct user API key (uak_) > OAuth/exchange JWT. refresh_token is
   // intentionally NOT a fallback here — it is refresh fuel, not a bearer
   // credential (an OAuth refresh token would just 401).
@@ -183,5 +183,5 @@ export function getAccessToken(): string | null {
 }
 
 export function getProjectId(override?: string): string | null {
-  return process.env.INSFORGE_PROJECT_ID ?? override ?? getProjectConfig()?.project_id ?? null;
+  return process.env.YARAH_PROJECT_ID ?? override ?? getProjectConfig()?.project_id ?? null;
 }

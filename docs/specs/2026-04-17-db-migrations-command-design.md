@@ -2,16 +2,16 @@
 
 ## Overview
 
-Add developer-facing database migration commands to the InsForge CLI in the sibling `CLI` repository. These commands work against the backend custom migrations API and manage local SQL migration files under `migrations/`.
+Add developer-facing database migration commands to the Yarah CLI in the sibling `CLI` repository. These commands work against the backend custom migrations API and manage local SQL migration files under `migrations/`.
 
 The CLI surface is:
 
-- `insforge db migrations list`
-- `insforge db migrations fetch`
-- `insforge db migrations new <migration-name>`
-- `insforge db migrations up <migration-file-name-or-version>`
-- `insforge db migrations up --to <migration-file-name-or-version>`
-- `insforge db migrations up --all`
+- `yarah db migrations list`
+- `yarah db migrations fetch`
+- `yarah db migrations new <migration-name>`
+- `yarah db migrations up <migration-file-name-or-version>`
+- `yarah db migrations up --to <migration-file-name-or-version>`
+- `yarah db migrations up --all`
 
 This is a safety-first design. Explicit single-target apply is tolerant of unrelated malformed files elsewhere in the directory, while inferred batch modes validate the whole local migration set and stop on the first issue.
 
@@ -32,7 +32,7 @@ This is a safety-first design. Explicit single-target apply is tolerant of unrel
 
 ## Command Design
 
-### `insforge db migrations list`
+### `yarah db migrations list`
 
 Fetch the current remote migration history and display:
 
@@ -47,7 +47,7 @@ Behavior:
 - supports `--json`
 - uses the remote order returned by the API
 
-### `insforge db migrations fetch`
+### `yarah db migrations fetch`
 
 Fetch remote migration history into local files under `migrations/`.
 
@@ -61,7 +61,7 @@ Behavior:
 - if the exact target file path already exists, skip it without overwriting, even if contents differ
 - supports `--json`
 
-### `insforge db migrations new <migration-name>`
+### `yarah db migrations new <migration-name>`
 
 Create a new local migration file.
 
@@ -89,7 +89,7 @@ Filename format:
 
 - `<migration_version>_<migration-name>.sql`
 
-### `insforge db migrations up <target>`
+### `yarah db migrations up <target>`
 
 Apply exactly one local migration file.
 
@@ -115,7 +115,7 @@ Validation rules:
 - target must be the next pending valid local migration after the latest remote version
 - unrelated invalid local files do not block an explicit valid target
 
-### `insforge db migrations up --to <target>`
+### `yarah db migrations up --to <target>`
 
 Apply every pending local migration up to and including a chosen target.
 
@@ -127,7 +127,7 @@ Behavior:
 - stops after the chosen target migration succeeds
 - fails if the target is already applied, missing, ambiguous, or not present in the pending set
 
-### `insforge db migrations up --all`
+### `yarah db migrations up --all`
 
 Apply every pending local migration.
 
@@ -163,7 +163,7 @@ Examples:
 
 ## API Dependencies
 
-This CLI feature depends on the backend routes already implemented in InsForge:
+This CLI feature depends on the backend routes already implemented in Yarah:
 
 - `GET /api/database/migrations`
 - `POST /api/database/migrations`

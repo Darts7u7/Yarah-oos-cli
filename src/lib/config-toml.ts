@@ -2,7 +2,7 @@ import * as smolToml from 'smol-toml';
 import {
   validateConfig,
   type AuthConfig,
-  type InsforgeConfig,
+  type YarahConfig,
   type PasswordConfig,
   type RetentionConfig,
   type StorageConfig,
@@ -10,7 +10,7 @@ import {
 } from './config-schema.js';
 import { parseEnvRef } from './config-secrets.js';
 
-export function parseConfigToml(input: string): InsforgeConfig {
+export function parseConfigToml(input: string): YarahConfig {
   let parsed: unknown;
   try {
     parsed = smolToml.parse(input);
@@ -24,13 +24,13 @@ export function parseConfigToml(input: string): InsforgeConfig {
  * Render a normalized config back to TOML. Section ordering is deterministic
  * (project_id → auth → auth.password → auth.smtp → storage → realtime
  * → schedules → deployments) so diffs are stable across runs of
- * `insforge config export`.
+ * `yarah config export`.
  *
  * The renderer is intentionally hand-rolled rather than using smol-toml's
  * stringify: smol-toml doesn't preserve field order, and we want a stable
  * lexical layout that survives git diff/code review.
  */
-export function stringifyConfigToml(config: InsforgeConfig): string {
+export function stringifyConfigToml(config: YarahConfig): string {
   const lines: string[] = [];
 
   if (config.project_id !== undefined) {
@@ -137,7 +137,7 @@ function renderSmtpFields(smtp: SmtpConfig, lines: string[]): void {
     // ref differently (e.g. env(PROD_SMTP_PASS)).
     const secretName = parseEnvRef(smtp.password) ?? 'SMTP_PASSWORD';
     lines.push(
-      `# password is managed via secrets — run \`insforge secrets add ${secretName} "<value>"\``,
+      `# password is managed via secrets — run \`yarah secrets add ${secretName} "<value>"\``,
     );
     lines.push(`password = ${JSON.stringify(smtp.password)}`);
   }

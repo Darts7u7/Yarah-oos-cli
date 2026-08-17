@@ -98,7 +98,7 @@ import { guardHook } from './lib/guard/index.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8')) as { version: string };
 
-const INSFORGE_LOGO = `
+const YARAH_LOGO = `
 ██╗███╗   ██╗███████╗███████╗ ██████╗ ██████╗  ██████╗ ███████╗
 ██║████╗  ██║██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝ ██╔════╝
 ██║██╔██╗ ██║███████╗█████╗  ██║   ██║██████╔╝██║  ███╗█████╗
@@ -111,8 +111,8 @@ const program = new Command();
 let didPlayForgerAnimation = false;
 
 program
-  .name('insforge')
-  .description('InsForge CLI - Command line tool for InsForge platform')
+  .name('yarah')
+  .description('Yarah CLI - Command line tool for Yarah platform')
   .version(pkg.version);
 
 // Global options
@@ -124,7 +124,7 @@ program
   .option('--reason <text>', 'Agent: what the operation does and why (intent) — shown to the human approver for destructive operations')
   .option('--impact <text>', 'Agent: implications — who/what is affected, data loss, reversibility — shown on the approval page')
   .option('--recommendation <text>', 'Agent: your recommendation to the human approver')
-  .option('--flag-destructive [reason]', 'Agent: flag this op as destructive for human approval even if InsForge\'s rules consider it safe (escalate-only — cannot downgrade the verdict)');
+  .option('--flag-destructive [reason]', 'Agent: flag this op as destructive for human approval even if Yarah\'s rules consider it safe (escalate-only — cannot downgrade the verdict)');
 
 program.hook('preAction', async (_thisCommand, actionCommand) => {
   if (didPlayForgerAnimation) return;
@@ -135,7 +135,7 @@ program.hook('preAction', async (_thisCommand, actionCommand) => {
   // --forger only plays on the root command. With a subcommand, warn and continue
   // so wrappers/CI that forward global flags are not hard-failed.
   if (actionCommand !== program) {
-    console.error('Warning: --forger is ignored with a subcommand. Use `insforge --forger` alone.');
+    console.error('Warning: --forger is ignored with a subcommand. Use `yarah --forger` alone.');
     return;
   }
 
@@ -314,7 +314,7 @@ program.action(async (options: { forger?: boolean; json?: boolean }) => {
   if (prompts.isInteractive) {
     await showInteractiveMenu();
   } else if (options.forger) {
-    const message = 'The --forger animation requires an interactive terminal. Run insforge in a TTY or omit --forger.';
+    const message = 'The --forger animation requires an interactive terminal. Run yarah in a TTY or omit --forger.';
     if (options.json) {
       outputJson({ error: message });
     } else {
@@ -342,14 +342,14 @@ async function showInteractiveMenu(): Promise<void> {
     isLinked = !!getProjectConfig()?.project_id;
   } catch { /* no project config */ }
 
-  console.log(INSFORGE_LOGO);
-  clack.intro(`InsForge CLI v${pkg.version}`);
+  console.log(YARAH_LOGO);
+  clack.intro(`Yarah CLI v${pkg.version}`);
 
   type Action = 'login' | 'create' | 'link' | 'deploy' | 'docs' | 'help';
   const options: { value: Action; label: string; hint?: string }[] = [];
 
   if (!isLoggedIn) {
-    options.push({ value: 'login', label: 'Log in to InsForge' });
+    options.push({ value: 'login', label: 'Log in to Yarah' });
   }
 
   options.push(
@@ -378,19 +378,19 @@ async function showInteractiveMenu(): Promise<void> {
 
   switch (action) {
     case 'login':
-      await program.parseAsync(['node', 'insforge', 'login']);
+      await program.parseAsync(['node', 'yarah', 'login']);
       break;
     case 'create':
-      await program.parseAsync(['node', 'insforge', 'create']);
+      await program.parseAsync(['node', 'yarah', 'create']);
       break;
     case 'link':
-      await program.parseAsync(['node', 'insforge', 'link']);
+      await program.parseAsync(['node', 'yarah', 'link']);
       break;
     case 'deploy':
-      await program.parseAsync(['node', 'insforge', 'deployments', 'deploy']);
+      await program.parseAsync(['node', 'yarah', 'deployments', 'deploy']);
       break;
     case 'docs':
-      await program.parseAsync(['node', 'insforge', 'docs']);
+      await program.parseAsync(['node', 'yarah', 'docs']);
       break;
     case 'help':
       program.help();

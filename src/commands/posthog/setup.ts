@@ -36,7 +36,7 @@ interface SetupResult {
    * Details of the connected PostHog project. `apiKey` is PostHog's public
    * client-side key (`phc_…`) — it ships in frontend bundles by design, so
    * printing it is safe and lets the user (or an agent, when the interactive
-   * wizard can't run) wire env vars against the exact project the InsForge
+   * wizard can't run) wire env vars against the exact project the Yarah
    * dashboard reads from.
    */
   connection: {
@@ -54,7 +54,7 @@ const WIZARD_COMMAND = `${NPX_COMMAND} -y @posthog/wizard@latest`;
 export function registerPosthogSetupCommand(program: Command): void {
   program
     .command('setup')
-    .description('Connect PostHog to your InsForge dashboard, then run the official PostHog wizard to wire it into your app')
+    .description('Connect PostHog to your Yarah dashboard, then run the official PostHog wizard to wire it into your app')
     .option('--skip-browser', 'Do not auto-open the browser for OAuth; only print the URL')
     .option('--key <key>', 'PostHog personal API key (self-hosted; skips the OAuth flow)')
     .option('--region <region>', 'PostHog Cloud region for --key: US or EU', 'US')
@@ -95,7 +95,7 @@ interface RunSetupOpts {
 }
 
 // Two-step flow:
-//   1. Ensure the InsForge dashboard has a PostHog connection (cli-start /
+//   1. Ensure the Yarah dashboard has a PostHog connection (cli-start /
 //      OAuth). This is what populates `posthog_connections` in cloud-backend
 //      and makes the in-product Analytics page renderable.
 //   2. Print the `npx @posthog/wizard` command and exit. The wizard is
@@ -113,7 +113,7 @@ async function runSetup(opts: RunSetupOpts): Promise<SetupResult> {
 
   if (!opts.json) {
     clack.intro('PostHog setup');
-    outputSuccess(`Linked to InsForge project: ${proj.project_name} (${proj.project_id})`);
+    outputSuccess(`Linked to Yarah project: ${proj.project_name} (${proj.project_id})`);
   }
 
   let dashboardConnection: SetupResult['dashboardConnection'];
@@ -138,7 +138,7 @@ async function runSetup(opts: RunSetupOpts): Promise<SetupResult> {
       );
     }
     if (!opts.json) {
-      outputSuccess('PostHog is already connected to your InsForge dashboard.');
+      outputSuccess('PostHog is already connected to your Yarah dashboard.');
     }
     connection = existing;
     dashboardConnection = 'already-connected';
@@ -146,7 +146,7 @@ async function runSetup(opts: RunSetupOpts): Promise<SetupResult> {
     // 2. Login token
     const token = getAccessToken();
     if (!token) {
-      throw new AuthError('Not logged in. Run `insforge login` first.');
+      throw new AuthError('Not logged in. Run `yarah login` first.');
     }
 
     // 3. Ensure dashboard connection exists
@@ -176,11 +176,11 @@ async function runSetup(opts: RunSetupOpts): Promise<SetupResult> {
         `  ${WIZARD_COMMAND}\n\n` +
         `Run it in your own terminal (it is interactive). It installs the SDK,\n` +
         `writes the PostHog env vars, and adds the init code. When it asks,\n` +
-        `pick the PostHog project your InsForge dashboard is connected to:\n\n` +
+        `pick the PostHog project your Yarah dashboard is connected to:\n\n` +
         `${details}\n\n` +
         `The API key is PostHog's public client-side key, safe to use in\n` +
         `frontend env vars. Once the wizard completes, open the Analytics\n` +
-        `page in your InsForge dashboard.`,
+        `page in your Yarah dashboard.`,
       'Next step',
     );
   }
@@ -250,7 +250,7 @@ async function ensureDashboardConnection(
 
   if (startResult.type === 'connected') {
     if (!opts.json) {
-      outputSuccess('PostHog is already connected to your InsForge dashboard.');
+      outputSuccess('PostHog is already connected to your Yarah dashboard.');
     }
     // Sanity-check that cloud-backend has the connection row, surface a clear
     // error if cli-start says yes but /connection says no (data drift).
@@ -279,7 +279,7 @@ async function runConnectFlow(
     process.stderr.write(`Authorize PostHog: ${authorizeUrl}\n`);
     process.stderr.write('Your browser should open automatically. If not, copy the URL above.\n');
   } else {
-    clack.log.info('PostHog is not yet connected to your InsForge dashboard.');
+    clack.log.info('PostHog is not yet connected to your Yarah dashboard.');
     if (opts.skipBrowser) {
       clack.log.info(`Open this URL to authorize PostHog:\n${pc.cyan(pc.underline(authorizeUrl))}`);
     } else {
@@ -299,11 +299,11 @@ async function runConnectFlow(
 
   const spinner = !opts.json && isInteractive ? clack.spinner() : null;
   if (spinner) {
-    spinner.start('Waiting for InsForge dashboard connection... (timeout: 15 minutes)');
+    spinner.start('Waiting for Yarah dashboard connection... (timeout: 15 minutes)');
   } else if (!opts.json) {
     // Non-interactive (agent / CI / non-TTY): spinner can't animate, but the
     // user still needs to know we're polling and how long we'll wait.
-    clack.log.info('Waiting for InsForge dashboard connection (up to 15 minutes)...');
+    clack.log.info('Waiting for Yarah dashboard connection (up to 15 minutes)...');
   }
 
   try {
@@ -319,7 +319,7 @@ async function runConnectFlow(
             const secs = Math.floor(elapsed / 1000);
             const mins = Math.floor(secs / 60);
             const remaining = `${mins}m ${secs % 60}s elapsed`;
-            spinner.message(`Waiting for InsForge dashboard connection... (${remaining})`);
+            spinner.message(`Waiting for Yarah dashboard connection... (${remaining})`);
           }
         },
       },
@@ -328,16 +328,16 @@ async function runConnectFlow(
     // Always print success — spinner.stop only renders in TTY, but the agent /
     // non-interactive user needs to see the outcome of the wait.
     if (spinner) {
-      spinner.stop('InsForge dashboard connection received.');
+      spinner.stop('Yarah dashboard connection received.');
     } else if (!opts.json) {
-      clack.log.success('InsForge dashboard connection received.');
+      clack.log.success('Yarah dashboard connection received.');
     }
     return connection;
   } catch (err) {
     if (spinner) {
-      spinner.stop('InsForge dashboard connection wait failed.');
+      spinner.stop('Yarah dashboard connection wait failed.');
     } else if (!opts.json) {
-      clack.log.error('InsForge dashboard connection wait failed.');
+      clack.log.error('Yarah dashboard connection wait failed.');
     }
     throw err;
   }

@@ -28,7 +28,7 @@ export function registerBranchMergeCommand(branch: Command): void {
       try {
         await requireAuth(apiUrl);
         const project = getProjectConfig();
-        if (!project) throw new CLIError('No project linked. Run `insforge link` first.');
+        if (!project) throw new CLIError('No project linked. Run `yarah link` first.');
 
         // Resolve branch by name. parent_id flips depending on whether the
         // directory is currently on a branch.

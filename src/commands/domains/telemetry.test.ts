@@ -8,7 +8,7 @@ const configMock = vi.hoisted(() => ({
     region: 'us',
     api_key: 'secret',
     appkey: 'app',
-    oss_host: 'https://app.us.insforge.app',
+    oss_host: 'https://app.us.apps.yarah.dev',
   })),
 }));
 vi.mock('../../lib/config.js', () => configMock);
@@ -33,7 +33,7 @@ describe('domain command telemetry', () => {
       region: 'us',
       api_key: 'secret',
       appkey: 'app',
-      oss_host: 'https://app.us.insforge.app',
+      oss_host: 'https://app.us.apps.yarah.dev',
     });
   });
 

@@ -28,8 +28,8 @@ const INSTALL_HINT = [
   '  • Or OrbStack / Colima / Rancher Desktop — any Docker-compatible daemon works.',
   '',
   '  Would rather not run one?',
-  '  • `insforge create` — a hosted project, ready in about 30 seconds.',
-  '  • `insforge link --api-base-url <url> --api-key <key>` — point this directory',
+  '  • `yarah create` — a hosted project, ready in about 30 seconds.',
+  '  • `yarah link --api-base-url <url> --api-key <key>` — point this directory',
   '    at a backend you already have. Neither needs Docker.',
 ].join('\n');
 

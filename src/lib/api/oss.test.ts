@@ -9,17 +9,17 @@ afterEach(() => {
 
 describe('spliceDatabasePassword', () => {
   // Real shape from cloud `/api/metadata/database-connection-string`
-  const masked = 'postgresql://postgres:********@b4jh2kvi.us-east.database.insforge.app:5432/insforge?sslmode=require';
+  const masked = 'postgresql://postgres:********@b4jh2kvi.us-east.database.apps.yarah.dev:5432/yarah?sslmode=require';
 
   it('replaces the masked password with the real one', () => {
     const result = spliceDatabasePassword(masked, '66666b99c46288a34220009437d8a3c2');
-    expect(result).toBe('postgresql://postgres:66666b99c46288a34220009437d8a3c2@b4jh2kvi.us-east.database.insforge.app:5432/insforge?sslmode=require');
+    expect(result).toBe('postgresql://postgres:66666b99c46288a34220009437d8a3c2@b4jh2kvi.us-east.database.apps.yarah.dev:5432/yarah?sslmode=require');
     expect(result).not.toContain('********');
   });
 
   it('preserves the rest of the URL exactly (host, port, db, query)', () => {
     const result = spliceDatabasePassword(masked, 'pw');
-    expect(result).toContain('@b4jh2kvi.us-east.database.insforge.app:5432/insforge?sslmode=require');
+    expect(result).toContain('@b4jh2kvi.us-east.database.apps.yarah.dev:5432/yarah?sslmode=require');
   });
 
   it('handles passwords containing special characters', () => {
@@ -29,9 +29,9 @@ describe('spliceDatabasePassword', () => {
   });
 
   it('only replaces the first `://user:...@` block (in case the URL has @ elsewhere)', () => {
-    const m = 'postgresql://postgres:********@db.host.app:5432/insforge?options=user%3D%40admin';
+    const m = 'postgresql://postgres:********@db.host.app:5432/yarah?options=user%3D%40admin';
     const result = spliceDatabasePassword(m, 'realpw');
-    expect(result).toBe('postgresql://postgres:realpw@db.host.app:5432/insforge?options=user%3D%40admin');
+    expect(result).toBe('postgresql://postgres:realpw@db.host.app:5432/yarah?options=user%3D%40admin');
   });
 });
 
@@ -63,7 +63,7 @@ describe('ossFetch', () => {
       appkey: 'app',
       region: 'us-east',
       api_key: 'ik_test',
-      oss_host: 'https://app.us-east.insforge.app',
+      oss_host: 'https://app.us-east.apps.yarah.dev',
     } satisfies ProjectConfig);
     vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
       new Response(JSON.stringify({ error: 'NOT_FOUND' }), {
@@ -73,7 +73,7 @@ describe('ossFetch', () => {
     );
 
     await expect(ossFetch('/api/ai/openrouter/api-key')).rejects.toThrow(
-      /Upgrade your InsForge project to a version with Model Gateway support/,
+      /Upgrade your Yarah project to a version with Model Gateway support/,
     );
   });
 
@@ -88,7 +88,7 @@ describe('ossFetch', () => {
       appkey: 'app',
       region: 'us-east',
       api_key: 'ik_test',
-      oss_host: 'https://app.us-east.insforge.app',
+      oss_host: 'https://app.us-east.apps.yarah.dev',
     } satisfies ProjectConfig);
     vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
       new Response(JSON.stringify({ error: 'NOT_FOUND' }), {
@@ -98,7 +98,7 @@ describe('ossFetch', () => {
     );
 
     await expect(ossFetch('/api/webscraper/apify/config')).rejects.toThrow(
-      /Upgrade your InsForge instance.*insforge webscraper apify connect --token/s,
+      /Upgrade your Yarah instance.*yarah webscraper apify connect --token/s,
     );
   });
 });

@@ -47,7 +47,7 @@ export type ConnectionFetch =
  * GET /integrations/apify/v1/connection?project_id=<id>
  *
  * Endpoint is owned by cloud-backend. Uses user-level Bearer auth from
- * `insforge login` rather than the project JWT — cloud-backend enforces a
+ * `yarah login` rather than the project JWT — cloud-backend enforces a
  * membership check on the project.
  *
  * Coded defensively: a 200 with a `status` field means connected.
@@ -143,7 +143,7 @@ export interface ApifyTokenStatus {
 }
 
 /**
- * Store a developer-supplied Apify API token on a self-hosted InsForge backend.
+ * Store a developer-supplied Apify API token on a self-hosted Yarah backend.
  *
  * Calls PUT /api/webscraper/apify/config on the project's OSS host. The backend
  * validates the token against Apify before saving, so a 400 here means the token
@@ -236,7 +236,7 @@ export async function pollApifyConnection(
     const elapsed = Date.now() - start;
     if (elapsed >= opts.timeoutMs) {
       throw new CLIError(
-        'Timed out waiting for Apify connection. Re-run `insforge webscraper apify connect` after authorizing.',
+        'Timed out waiting for Apify connection. Re-run `yarah webscraper apify connect` after authorizing.',
       );
     }
     opts.onTick?.(elapsed);
@@ -250,7 +250,7 @@ export async function pollApifyConnection(
         throw new CLIError(`Forbidden: ${result.message}`, 5);
       case 'unauthorized':
         throw new CLIError(
-          `Not authenticated (HTTP 401): ${result.message}. Re-run \`insforge login\`.`,
+          `Not authenticated (HTTP 401): ${result.message}. Re-run \`yarah login\`.`,
           2,
         );
       case 'error':
@@ -280,7 +280,7 @@ export type ApifyCliStartResponse =
  * Asks cloud-backend whether this project is already connected (or can be
  * inline auto-provisioned for new users) — in which case we skip the browser
  * hop entirely. Otherwise returns a direct Apify `authorizeUrl` that the user
- * must consent at; the URL points straight at apify.com (no Insforge
+ * must consent at; the URL points straight at apify.com (no Yarah
  * dashboard in the path).
  */
 export async function startApifyCliFlow(
@@ -308,7 +308,7 @@ export async function startApifyCliFlow(
     const body = (await res.json().catch(() => ({}))) as { error?: string };
     const msg = body.error ?? res.statusText ?? `HTTP ${res.status}`;
     if (res.status === 401) {
-      throw new CLIError(`Not authenticated (HTTP 401): ${msg}. Re-run \`insforge login\`.`);
+      throw new CLIError(`Not authenticated (HTTP 401): ${msg}. Re-run \`yarah login\`.`);
     }
     if (res.status === 403) {
       throw new CLIError(`Forbidden (HTTP 403): ${msg}`, 5);

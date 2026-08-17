@@ -135,7 +135,7 @@ describe('liveFromMetadata', () => {
 });
 
 describe('configFromMetadata', () => {
-  it('projects a full backend response onto InsforgeConfig with no skipped entries', () => {
+  it('projects a full backend response onto YarahConfig with no skipped entries', () => {
     const { config, skipped } = configFromMetadata(
       {
         auth: {

@@ -42,7 +42,7 @@ export function describeExecError(err: unknown): string {
 }
 
 const GITIGNORE_ENTRIES = [
-  '.insforge',
+  '.yarah',
   '.agent',
   '.agents',
   '.augment',
@@ -65,21 +65,21 @@ function updateGitignore(): void {
   const missing = GITIGNORE_ENTRIES.filter((entry) => !lines.has(entry));
   if (!missing.length) return;
 
-  const block = `\n# InsForge & AI agent skills\n${missing.join('\n')}\n`;
+  const block = `\n# Yarah & AI agent skills\n${missing.join('\n')}\n`;
   appendFileSync(gitignorePath, block);
 }
 
 // Agents that the `npx skills add -a <agent>` CLI knows how to target. Kept
 // here so the BA-provider install below stays in lockstep with the main
-// InsForge install — no per-call-site drift if we add a new agent in future.
+// Yarah install — no per-call-site drift if we add a new agent in future.
 const AGENT_FLAGS =
   '-a antigravity -a augment -a claude-code -a cline -a codex -a cursor -a gemini-cli -a github-copilot -a kilo -a qoder -a qwen-code -a roo -a trae -a windsurf';
 
-// Provider-specific skill packs we install on top of the InsForge skills when
+// Provider-specific skill packs we install on top of the Yarah skills when
 // the user wires that provider in via `link --auth <provider>` / `create
 // --auth <provider>`. Each is its own marketplace/skill repo — they
-// complement (not duplicate) `insforge-integrations`, which covers the
-// InsForge bridge side of each provider.
+// complement (not duplicate) `yarah-integrations`, which covers the
+// Yarah bridge side of each provider.
 export const PROVIDER_SKILLS: Record<string, { repo: string; label: string }> = {
   'better-auth': { repo: 'better-auth/skills', label: 'Better Auth skills' },
   apify: { repo: 'apify/agent-skills', label: 'Apify skills' },
@@ -87,16 +87,16 @@ export const PROVIDER_SKILLS: Record<string, { repo: string; label: string }> = 
 
 export async function installSkills(json: boolean, authProvider?: string): Promise<void> {
   try {
-    if (!json) clack.log.info('Installing InsForge agent skills (global)...');
-    await execAsync(`npx skills add insforge/agent-skills -g -y ${AGENT_FLAGS}`, {
+    if (!json) clack.log.info('Installing Yarah agent skills (global)...');
+    await execAsync(`npx skills add Darts7u7/Yarah-oos-skills -g -y ${AGENT_FLAGS}`, {
       cwd: process.cwd(),
       timeout: SKILL_INSTALL_TIMEOUT_MS,
     });
-    if (!json) clack.log.success('InsForge agent skills installed.');
+    if (!json) clack.log.success('Yarah agent skills installed.');
   } catch (err) {
     if (!json) {
       clack.log.warn(`Could not install agent skills: ${describeExecError(err)}`);
-      clack.log.info('Run `npx skills add insforge/agent-skills` once resolved to see the full output.');
+      clack.log.info('Run `npx skills add Darts7u7/Yarah-oos-skills` once resolved to see the full output.');
     }
   }
 
@@ -117,8 +117,8 @@ export async function installSkills(json: boolean, authProvider?: string): Promi
 
   // Provider-specific skills: install the upstream pack (e.g. better-auth's
   // own skills repo) when the user opted into a third-party auth provider.
-  // Complements `insforge-integrations` rather than replacing it — that one
-  // covers the InsForge bridge side; this one covers the provider's own
+  // Complements `yarah-integrations` rather than replacing it — that one
+  // covers the Yarah bridge side; this one covers the provider's own
   // patterns (BA scaffolding, email/password, 2FA, organizations, etc.).
   if (authProvider) {
     await installProviderSkillPack(json, authProvider);
@@ -132,7 +132,7 @@ export async function installSkills(json: boolean, authProvider?: string): Promi
 
   // Drop an AGENTS.md in the project root so bare "true harness" agents that
   // follow the open agents.md standard (and don't read the per-agent skill
-  // dirs) still get InsForge context. Left out of .gitignore on purpose so it
+  // dirs) still get Yarah context. Left out of .gitignore on purpose so it
   // can be committed and shared. Best-effort — never block create/link.
   try {
     writeLocalAgentsMd(json);
@@ -143,8 +143,8 @@ export async function installSkills(json: boolean, authProvider?: string): Promi
 
 /**
  * Install ONLY a single provider's upstream skill pack (e.g. `apify`), without
- * reinstalling the main InsForge skills or find-skills. Use when wiring a
- * connector after the project already has the InsForge skills — avoids
+ * reinstalling the main Yarah skills or find-skills. Use when wiring a
+ * connector after the project already has the Yarah skills — avoids
  * clobbering them and is much faster. Also the single source of truth for the
  * provider-pack install used by `installSkills`.
  *

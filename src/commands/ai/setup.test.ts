@@ -19,7 +19,7 @@ vi.mock('../../lib/config.js', () => ({
     appkey: 'app',
     region: 'us-east',
     api_key: 'ik_test',
-    oss_host: 'https://app.us-east.insforge.app',
+    oss_host: 'https://app.us-east.apps.yarah.dev',
   })),
 }));
 

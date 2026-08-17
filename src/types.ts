@@ -116,7 +116,7 @@ export interface GlobalConfig {
   oauth_client_id?: string;
 }
 
-// Project config (local .insforge/project.json)
+// Project config (local .yarah/project.json)
 export interface ProjectConfig {
   project_id: string;
   project_name: string;
@@ -130,7 +130,7 @@ export interface ProjectConfig {
    *  resolution and `branch switch --parent` know where to land back. */
   branched_from?: { project_id: string; project_name: string };
   /** When set, persists the human-in-the-loop guard enablement for this project
-   *  (set via `link --guard`). The INSFORGE_GUARD env var still overrides it. */
+   *  (set via `link --guard`). The YARAH_GUARD env var still overrides it. */
   guard?: boolean;
 }
 
@@ -213,7 +213,7 @@ export type { ListFunctionsResponse, StorageBucketSchema, ListDeploymentsRespons
   CreateDeploymentResponse, CreateDirectDeploymentRequest, CreateDirectDeploymentResponse,
   DeploymentManifestFileEntry, DeploymentManifestFile, UploadDeploymentFileResponse,
   StartDeploymentRequest, DeploymentSchema, DeploymentMetadataResponse
- } from '@insforge/shared-schemas';
+ } from '@yarahdev/shared-schemas';
 
 // Function types (kept local: shared-schemas source defines FunctionResponse and
 // DeploymentResult but the published npm package does not export them yet)
@@ -255,7 +255,7 @@ export interface UpgradeInstanceBody {
   instanceType: string;
 }
 
-/** Response of GET /platform/insforge/latest-version (public). */
+/** Response of GET /platform/yarah/latest-version (public). */
 export interface LatestVersionResponse {
   version: string;
   cached: boolean;

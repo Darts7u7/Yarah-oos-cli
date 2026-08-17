@@ -20,8 +20,8 @@ describe('requestDeviceAuthorization', () => {
       jsonResponse({
         device_code: 'dvc_abc',
         user_code: 'BCDF-GHJK',
-        verification_uri: 'https://insforge.dev/auth/device',
-        verification_uri_complete: 'https://insforge.dev/auth/device?user_code=BCDF-GHJK',
+        verification_uri: 'https://yarah.dev/auth/device',
+        verification_uri_complete: 'https://yarah.dev/auth/device?user_code=BCDF-GHJK',
         expires_in: 900,
         interval: 5,
       })

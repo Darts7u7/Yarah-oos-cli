@@ -142,7 +142,7 @@ describe('stringifyConfigToml — auth.smtp', () => {
     });
     expect(out).toContain('[auth.smtp]');
     expect(out).toContain('password = "env(SMTP_PASSWORD)"');
-    expect(out).toContain('insforge secrets add SMTP_PASSWORD');
+    expect(out).toContain('yarah secrets add SMTP_PASSWORD');
   });
 
   it('discovery comment names the actual env ref, not the SMTP_PASSWORD default', () => {
@@ -156,8 +156,8 @@ describe('stringifyConfigToml — auth.smtp', () => {
         },
       },
     });
-    expect(out).toContain('insforge secrets add PROD_SMTP_PASS');
-    expect(out).not.toContain('insforge secrets add SMTP_PASSWORD');
+    expect(out).toContain('yarah secrets add PROD_SMTP_PASS');
+    expect(out).not.toContain('yarah secrets add SMTP_PASSWORD');
   });
 
   it('omits password line entirely when password is undefined', () => {

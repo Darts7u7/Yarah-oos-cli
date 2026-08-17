@@ -184,7 +184,7 @@ export function registerDiagnoseIncidentCommand(diagnoseCmd: Command): void {
         if (!config) throw new ProjectNotLinkedError();
         if (config.project_id === FAKE_PROJECT_ID) {
           throw new CLIError(
-            'Incident report requires InsForge Platform login. Not available when linked via --api-key.',
+            'Incident report requires Yarah Platform login. Not available when linked via --api-key.',
           );
         }
         trackDiagnose('incident', config);

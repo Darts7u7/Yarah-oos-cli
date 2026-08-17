@@ -105,7 +105,7 @@ describe('describeExecError', () => {
 });
 
 describe('reportCliUsage', () => {
-  const explicitConfig = { oss_host: 'https://proj.region.insforge.app', api_key: 'test-key' };
+  const explicitConfig = { oss_host: 'https://proj.region.apps.yarah.dev', api_key: 'test-key' };
   let fetchMock: ReturnType<typeof vi.fn>;
   const originalFetch = globalThis.fetch;
 
@@ -124,7 +124,7 @@ describe('reportCliUsage', () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = fetchMock.mock.calls[0];
-    expect(url).toBe('https://proj.region.insforge.app/api/usage/mcp');
+    expect(url).toBe('https://proj.region.apps.yarah.dev/api/usage/mcp');
 
     const headers = (init as RequestInit).headers as Record<string, string>;
     expect(headers['x-api-key']).toBe('test-key');

@@ -7,7 +7,7 @@ import { outputJson, outputTable } from '../../lib/output.js';
 import { reportCliUsage } from '../../lib/skills.js';
 import { trackDiagnose, shutdownAnalytics } from '../../lib/analytics.js';
 
-const LOG_SOURCES = ['insforge.logs', 'postgREST.logs', 'postgres.logs', 'function.logs', 'function-deploy.logs'] as const;
+const LOG_SOURCES = ['yarah.logs', 'postgREST.logs', 'postgres.logs', 'function.logs', 'function-deploy.logs'] as const;
 
 const ERROR_PATTERN = /\b(error|fatal|panic)\b/i;
 

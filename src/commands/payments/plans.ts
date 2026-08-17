@@ -9,7 +9,7 @@ import { outputJson, outputSuccess, outputTable } from "../../lib/output.js";
 import type {
   CreateRazorpayPlanBody,
   ListRazorpayCatalogResponse,
-} from "@insforge/shared-schemas";
+} from "@yarahdev/shared-schemas";
 import {
   formatAmount,
   formatDate,

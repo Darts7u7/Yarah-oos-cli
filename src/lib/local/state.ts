@@ -1,14 +1,14 @@
 /**
- * On-disk state for a local InsForge instance.
+ * On-disk state for a local Yarah instance.
  *
  * One instance per directory: the compose project name is derived from the
  * directory path, so two app folders get separate containers, volumes, and
  * databases without any configuration.
  *
  * Two files, split by what they hold:
- *   .insforge/local.json — non-secret machine state (ports, resolved version)
- *   .insforge/local.env  — generated secrets, mode 0600, fed to `--env-file`
- * Both are gitignored via .insforge/.gitignore so a `git add -A` can't commit
+ *   .yarah/local.json — non-secret machine state (ports, resolved version)
+ *   .yarah/local.env  — generated secrets, mode 0600, fed to `--env-file`
+ * Both are gitignored via .yarah/.gitignore so a `git add -A` can't commit
  * the keys.
  */
 
@@ -56,10 +56,10 @@ export const DEFAULT_PORTS: LocalPorts = {
 };
 
 function localDir(cwd: string = process.cwd()): string {
-  return join(cwd, '.insforge');
+  return join(cwd, '.yarah');
 }
 
-/** Create `.insforge/` if needed. Callers write into it without ordering rules. */
+/** Create `.yarah/` if needed. Callers write into it without ordering rules. */
 export function ensureLocalDir(cwd?: string): string {
   const dir = localDir(cwd);
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
@@ -80,13 +80,13 @@ export function composeProjectName(cwd: string = process.cwd()): string {
   // Both separators, not node:path's basename: that one is platform-specific, so
   // a Windows path handed to a POSIX build keeps its backslashes and the whole
   // path becomes the name.
-  const base = (cwd.split(/[\\/]/).filter(Boolean).pop() ?? 'insforge')
+  const base = (cwd.split(/[\\/]/).filter(Boolean).pop() ?? 'yarah')
     .toLowerCase()
     .replace(/[^a-z0-9_-]/g, '-')
     .replace(/^[^a-z0-9]+/, '')
     .slice(0, 24);
   const hash = createHash('sha256').update(cwd).digest('hex').slice(0, 8);
-  return `insforge-${base || 'app'}-${hash}`;
+  return `yarah-${base || 'app'}-${hash}`;
 }
 
 function isLocalState(v: unknown): v is LocalState {

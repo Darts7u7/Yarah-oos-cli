@@ -12,17 +12,17 @@ const LANGUAGES = ['typescript', 'swift', 'kotlin', 'rest-api'] as const;
 export function registerDocsCommand(program: Command): void {
   program
     .command('docs [feature] [language]')
-    .description('Browse InsForge SDK documentation')
+    .description('Browse Yarah SDK documentation')
     .addHelpText('after', `
 Features: ${FEATURES.join(', ')}
 Languages: ${LANGUAGES.join(', ')}
 
 Examples:
-  npx @insforge/cli docs                        List all available docs
-  npx @insforge/cli docs instructions           Show setup instructions
-  npx @insforge/cli docs db typescript          Show TypeScript database SDK docs
-  npx @insforge/cli docs auth swift             Show Swift auth SDK docs
-  npx @insforge/cli docs storage rest-api       Show REST API storage docs`)
+  npx @yarahdev/cli docs                        List all available docs
+  npx @yarahdev/cli docs instructions           Show setup instructions
+  npx @yarahdev/cli docs db typescript          Show TypeScript database SDK docs
+  npx @yarahdev/cli docs auth swift             Show Swift auth SDK docs
+  npx @yarahdev/cli docs storage rest-api       Show REST API storage docs`)
     .action(async (feature: string | undefined, language: string | undefined, _opts, cmd) => {
       const { json } = getRootOpts(cmd);
       try {

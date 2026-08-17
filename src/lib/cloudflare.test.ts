@@ -31,7 +31,7 @@ describe('Cloudflare OAuth helpers', () => {
   });
 
   it('allows a development override for the Cloudflare OAuth client id', () => {
-    vi.stubEnv('INSFORGE_CLOUDFLARE_OAUTH_CLIENT_ID', 'dev-client-id');
+    vi.stubEnv('YARAH_CLOUDFLARE_OAUTH_CLIENT_ID', 'dev-client-id');
     const url = new URL(buildCloudflareAuthorizeUrl({
       state: 'state-123456',
       codeChallenge: 'challenge-abc',

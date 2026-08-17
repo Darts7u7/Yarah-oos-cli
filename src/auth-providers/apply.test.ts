@@ -53,16 +53,16 @@ describe('extractEnvPairs', () => {
     expect(m.get('BAR')).toBe('hello world');
   });
   it('preserves URL-style values verbatim', () => {
-    const m = extractEnvPairs('DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/insforge\n');
-    expect(m.get('DATABASE_URL')).toBe('postgresql://postgres:postgres@127.0.0.1:5432/insforge');
+    const m = extractEnvPairs('DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/yarah\n');
+    expect(m.get('DATABASE_URL')).toBe('postgresql://postgres:postgres@127.0.0.1:5432/yarah');
   });
 });
 
 describe('refreshStaleEnvDefaults', () => {
   it('replaces user value when it matches manifest default and platform has real value', () => {
-    const existing = 'DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/insforge\nFOO=keep-me\n';
+    const existing = 'DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/yarah\nFOO=keep-me\n';
     const defaults = new Map([
-      ['DATABASE_URL', 'postgresql://postgres:postgres@127.0.0.1:5432/insforge'],
+      ['DATABASE_URL', 'postgresql://postgres:postgres@127.0.0.1:5432/yarah'],
     ]);
     const platform = new Map([
       ['DATABASE_URL', 'postgresql://postgres:secret@cloud.host:5432/db?sslmode=require'],
@@ -77,7 +77,7 @@ describe('refreshStaleEnvDefaults', () => {
   it('preserves user value when it differs from the manifest default', () => {
     const existing = 'DATABASE_URL=postgresql://customized@host/db\n';
     const defaults = new Map([
-      ['DATABASE_URL', 'postgresql://postgres:postgres@127.0.0.1:5432/insforge'],
+      ['DATABASE_URL', 'postgresql://postgres:postgres@127.0.0.1:5432/yarah'],
     ]);
     const platform = new Map([
       ['DATABASE_URL', 'postgresql://cloud@host/db?sslmode=require'],
@@ -88,12 +88,12 @@ describe('refreshStaleEnvDefaults', () => {
   });
 
   it('skips refresh when platform has no real value (self-hosted, helper returned null)', () => {
-    const existing = 'DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/insforge\n';
+    const existing = 'DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/yarah\n';
     const defaults = new Map([
-      ['DATABASE_URL', 'postgresql://postgres:postgres@127.0.0.1:5432/insforge'],
+      ['DATABASE_URL', 'postgresql://postgres:postgres@127.0.0.1:5432/yarah'],
     ]);
     const platform = new Map([
-      ['DATABASE_URL', 'postgresql://postgres:postgres@127.0.0.1:5432/insforge'],
+      ['DATABASE_URL', 'postgresql://postgres:postgres@127.0.0.1:5432/yarah'],
     ]);
     const { updated, refreshed } = refreshStaleEnvDefaults(existing, defaults, platform);
     expect(refreshed).toEqual([]);
@@ -104,12 +104,12 @@ describe('refreshStaleEnvDefaults', () => {
     // Pre-0.1.72 cloud links wrote `postgresql://postgres:********@...`
     // (placeholder password) to .env.local. Re-linking under 0.1.72+ should
     // replace that with the real spliced password from /database-password.
-    const existing = 'DATABASE_URL=postgresql://postgres:********@m8s5kmam.us-east.database.insforge.app:5432/insforge?sslmode=require\n';
+    const existing = 'DATABASE_URL=postgresql://postgres:********@m8s5kmam.us-east.database.apps.yarah.dev:5432/yarah?sslmode=require\n';
     const defaults = new Map([
-      ['DATABASE_URL', 'postgresql://postgres:postgres@127.0.0.1:5432/insforge'],
+      ['DATABASE_URL', 'postgresql://postgres:postgres@127.0.0.1:5432/yarah'],
     ]);
     const platform = new Map([
-      ['DATABASE_URL', 'postgresql://postgres:realsecret@m8s5kmam.us-east.database.insforge.app:5432/insforge?sslmode=require'],
+      ['DATABASE_URL', 'postgresql://postgres:realsecret@m8s5kmam.us-east.database.apps.yarah.dev:5432/yarah?sslmode=require'],
     ]);
     const { updated, refreshed } = refreshStaleEnvDefaults(existing, defaults, platform);
     expect(refreshed).toEqual(['DATABASE_URL']);
@@ -119,24 +119,24 @@ describe('refreshStaleEnvDefaults', () => {
 
   it('handles multiple keys, refreshing only the stale ones', () => {
     const existing = [
-      'DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/insforge',
+      'DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/yarah',
       'BETTER_AUTH_SECRET=user-set-this-already',
-      'INSFORGE_JWT_SECRET=replace-with-output-of-cli-secrets-get-JWT_SECRET',
+      'YARAH_JWT_SECRET=replace-with-output-of-cli-secrets-get-JWT_SECRET',
     ].join('\n') + '\n';
     const defaults = new Map([
-      ['DATABASE_URL', 'postgresql://postgres:postgres@127.0.0.1:5432/insforge'],
+      ['DATABASE_URL', 'postgresql://postgres:postgres@127.0.0.1:5432/yarah'],
       ['BETTER_AUTH_SECRET', 'replace-with-32-random-bytes'],
-      ['INSFORGE_JWT_SECRET', 'replace-with-output-of-cli-secrets-get-JWT_SECRET'],
+      ['YARAH_JWT_SECRET', 'replace-with-output-of-cli-secrets-get-JWT_SECRET'],
     ]);
     const platform = new Map([
       ['DATABASE_URL', 'postgresql://cloud@host/db?sslmode=require'],
       ['BETTER_AUTH_SECRET', 'random-bytes-1234'],
-      ['INSFORGE_JWT_SECRET', 'real-jwt-secret-from-platform'],
+      ['YARAH_JWT_SECRET', 'real-jwt-secret-from-platform'],
     ]);
     const { updated, refreshed } = refreshStaleEnvDefaults(existing, defaults, platform);
-    expect(refreshed.sort()).toEqual(['DATABASE_URL', 'INSFORGE_JWT_SECRET']);
+    expect(refreshed.sort()).toEqual(['DATABASE_URL', 'YARAH_JWT_SECRET']);
     expect(updated).toContain('DATABASE_URL=postgresql://cloud@host/db?sslmode=require');
     expect(updated).toContain('BETTER_AUTH_SECRET=user-set-this-already');
-    expect(updated).toContain('INSFORGE_JWT_SECRET=real-jwt-secret-from-platform');
+    expect(updated).toContain('YARAH_JWT_SECRET=real-jwt-secret-from-platform');
   });
 });

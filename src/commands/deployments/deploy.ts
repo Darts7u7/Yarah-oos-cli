@@ -42,7 +42,7 @@ const EXCLUDE_PATTERNS = [
   'dist',
   'build',
   '.DS_Store',
-  '.insforge',
+  '.yarah',
   // IDE and AI agent configs
   '.claude',
   '.agents',
@@ -89,9 +89,9 @@ function shouldExclude(name: string): boolean {
   return false;
 }
 
-function isInsforgeCloudOssHost(ossHost: string): boolean {
+function isYarahCloudOssHost(ossHost: string): boolean {
   try {
-    return new URL(ossHost).hostname.endsWith('.insforge.app');
+    return new URL(ossHost).hostname.endsWith('.apps.yarah.dev');
   } catch {
     return false;
   }
@@ -389,7 +389,7 @@ async function deployProjectDirect(
   spinner?.message('Starting deployment...');
   await startDirectDeployment(createResult.id, startBody);
 
-  return await pollDeployment(createResult.id, spinner, !isInsforgeCloudOssHost(config.oss_host));
+  return await pollDeployment(createResult.id, spinner, !isYarahCloudOssHost(config.oss_host));
 }
 
 async function deployProjectLegacy(
@@ -568,7 +568,7 @@ export function registerDeploymentsDeployCommand(deploymentsCmd: Command): void 
             if (result.lastError) {
               clack.log.warn(`Could not read the deployment status: ${result.lastError}`);
             }
-            clack.log.info(`Check status with: npx @insforge/cli deployments status ${result.deploymentId}`);
+            clack.log.info(`Check status with: npx @yarahdev/cli deployments status ${result.deploymentId}`);
           }
         }
         await trackDeploymentUsage('deploy', true, {

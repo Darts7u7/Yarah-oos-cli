@@ -1,5 +1,5 @@
 import type {
-  InsforgeConfig,
+  YarahConfig,
   PasswordConfig,
   RetentionConfig,
   StorageConfig,
@@ -156,11 +156,11 @@ export interface DiffResult {
 
 export interface DiffInput {
   live: LiveConfig;
-  file: InsforgeConfig;
+  file: YarahConfig;
 }
 
 /**
- * Live state shape used as input to diff. Mirrors InsforgeConfig but the SMTP
+ * Live state shape used as input to diff. Mirrors YarahConfig but the SMTP
  * slice includes hasPassword (which we get from the backend but never emit
  * back into TOML).
  */

@@ -16,7 +16,7 @@ import { getProfile } from './api/platform.js';
 import { formatFetchError } from './errors.js';
 import type { PendingDeviceLogin, StoredCredentials } from '../types.js';
 
-// Default OAuth client for InsForge CLI (pre-registered on the platform)
+// Default OAuth client for Yarah CLI (pre-registered on the platform)
 export const DEFAULT_CLIENT_ID = 'clf_NK8cMUs41gm8ZcfdtSguVw';
 export const OAUTH_SCOPES = 'user:read organizations:read projects:read projects:write';
 
@@ -301,7 +301,7 @@ export async function performOAuthLogin(apiUrl?: string): Promise<StoredCredenti
 }
 
 // ============================================================================
-// Device Authorization Grant (RFC 8628) — `insforge login --device`
+// Device Authorization Grant (RFC 8628) — `yarah login --device`
 //
 // For environments where the browser can never reach a loopback listener in
 // this process (agent sandboxes like the ChatGPT app, SSH, containers, CI).
@@ -341,7 +341,7 @@ export async function requestDeviceAuthorization(params: {
   if (!res.ok) {
     const err = await res.json().catch(() => ({})) as { error?: string; message?: string };
     if (err.error === 'unauthorized_client') {
-      throw new Error('Device login is not enabled for this OAuth client (server too old or grant not enabled). Use `insforge login` or `insforge login --user-api-key` instead.');
+      throw new Error('Device login is not enabled for this OAuth client (server too old or grant not enabled). Use `yarah login` or `yarah login --user-api-key` instead.');
     }
     throw new Error(err.message ?? err.error ?? `Device authorization failed (HTTP ${res.status})`);
   }
@@ -402,13 +402,13 @@ export async function pollForDeviceTokens(params: {
       case 'access_denied':
         throw new Error('Login request was denied in the dashboard.');
       case 'expired_token':
-        throw new Error('The device code expired before the login was approved. Run `insforge login --device` again.');
+        throw new Error('The device code expired before the login was approved. Run `yarah login --device` again.');
       default:
         throw new Error(err.error ?? `Token polling failed (HTTP ${res.status})`);
     }
   }
 
-  throw new Error('The device code expired before the login was approved. Run `insforge login --device` again.');
+  throw new Error('The device code expired before the login was approved. Run `yarah login --device` again.');
 }
 
 /**

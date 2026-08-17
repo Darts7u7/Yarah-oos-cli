@@ -1,8 +1,8 @@
 /**
  * The env file the local stack runs on.
  *
- * InsForge's setup.sh generates the secrets — JWT, encryption key, Postgres and
- * admin passwords, and the two access keys — into `.insforge/checkout/.env`, and
+ * Yarah's setup.sh generates the secrets — JWT, encryption key, Postgres and
+ * admin passwords, and the two access keys — into `.yarah/checkout/.env`, and
  * leaves that file alone on re-runs. The CLI reads them back for wiring and adds
  * what only it knows: the ports this directory chose, and the store credentials
  * a storage overlay needs.
@@ -50,7 +50,7 @@ export function parseEnvFile(content: string): Record<string, string> {
 export function setEnvVars(vars: Record<string, string>, cwd?: string): void {
   const path = checkoutEnvFile(cwd);
   if (!existsSync(path)) {
-    throw new CLIError(`${path} is missing. Run \`insforge local start\` to create it.`);
+    throw new CLIError(`${path} is missing. Run \`yarah local start\` to create it.`);
   }
   const lines = readFileSync(path, 'utf-8').split('\n');
   for (const [key, value] of Object.entries(vars)) {
@@ -87,7 +87,7 @@ export function readSecrets(cwd?: string): LocalSecrets | null {
  * failed authentication for everyone who copied it.
  */
 export function databaseUrl(password: string, port: number): string {
-  return `postgresql://postgres:${password}@localhost:${port}/insforge`;
+  return `postgresql://postgres:${password}@localhost:${port}/yarah`;
 }
 
 export interface EnvDeltaInput {
@@ -118,7 +118,7 @@ export function writeEnvDeltas({ ports, storage, cwd }: EnvDeltaInput): void {
   if (storage === 'minio' || storage === 'rustfs') {
     const user = storage === 'minio' ? 'MINIO_ROOT_USER' : 'RUSTFS_ACCESS_KEY';
     const pass = storage === 'minio' ? 'MINIO_ROOT_PASSWORD' : 'RUSTFS_SECRET_KEY';
-    vars[user] = existing[user] || 'insforge';
+    vars[user] = existing[user] || 'yarah';
     vars[pass] = existing[pass] || hex(16);
   }
 

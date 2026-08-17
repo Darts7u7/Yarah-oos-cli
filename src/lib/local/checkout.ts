@@ -1,5 +1,5 @@
 /**
- * Fetch and run InsForge's own setup.sh to populate `.insforge/checkout/`.
+ * Fetch and run Yarah's own setup.sh to populate `.yarah/checkout/`.
  *
  * The CLI used to carry a 266-line copy of the compose file plus the four files
  * it inlines. That copy drifted within a day of being written — the connection
@@ -8,7 +8,7 @@
  * exactly this: it owns the file list, the layout the compose file's relative
  * mounts expect, and the secret generation.
  *
- * INSFORGE_NO_GIT=1 keeps `docker` the only thing a developer needs installed;
+ * YARAH_NO_GIT=1 keeps `docker` the only thing a developer needs installed;
  * the script falls back to fetching each file over HTTPS.
  */
 
@@ -18,7 +18,7 @@ import { join } from 'node:path';
 import { CLIError } from '../errors.js';
 import { ensureLocalDir, OVERLAYS } from './state.js';
 
-const SETUP_URL = 'https://raw.githubusercontent.com/InsForge/InsForge/main/deploy/setup.sh';
+const SETUP_URL = 'https://raw.githubusercontent.com/Darts7u7/Yarah-oos/main/deploy/setup.sh';
 const FETCH_TIMEOUT_MS = 15_000;
 
 /** Where the stack's files live. One directory, updated in place: the secrets
@@ -97,10 +97,10 @@ async function fetchSetupScript(): Promise<string> {
     const res = await fetch(SETUP_URL, { signal: controller.signal });
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     const body = await res.text();
-    if (!body.includes('INSFORGE_NO_GIT')) {
+    if (!body.includes('YARAH_NO_GIT')) {
       // Not the script we expect — a proxy login page, or a release predating
       // the flag. Running it would clone with git, or do something else again.
-      throw new Error('response is not a setup.sh that supports INSFORGE_NO_GIT');
+      throw new Error('response is not a setup.sh that supports YARAH_NO_GIT');
     }
     return body;
   } finally {
@@ -109,7 +109,7 @@ async function fetchSetupScript(): Promise<string> {
 }
 
 /**
- * Make sure `.insforge/checkout/` holds the stack, and return its directory.
+ * Make sure `.yarah/checkout/` holds the stack, and return its directory.
  *
  * Re-running is how a stale checkout catches up, so this fetches every time
  * rather than short-circuiting on an existing directory: setup.sh overwrites the
@@ -128,7 +128,7 @@ export async function ensureCheckout(
   } catch (err) {
     if (checkoutReady(cwd, storage)) return dir;
     throw new CLIError(
-      `Could not fetch InsForge's setup script: ${err instanceof Error ? err.message : String(err)}\n` +
+      `Could not fetch Yarah's setup script: ${err instanceof Error ? err.message : String(err)}\n` +
         `  ${SETUP_URL}\n\n` +
         'The stack is defined in that repository rather than bundled with the CLI,\n' +
         'so a first start needs to reach it. Later starts reuse what it wrote.',
@@ -150,7 +150,7 @@ export async function ensureCheckout(
           'That file holds the only copy of its secrets. Generating new ones would\n' +
           'leave the database unreachable behind the old password.\n\n' +
           '  • Restore the file from a backup and start again, or\n' +
-          '  • `insforge local stop --delete-data` to discard the old instance.',
+          '  • `yarah local stop --delete-data` to discard the old instance.',
       );
     }
   }
@@ -159,20 +159,20 @@ export async function ensureCheckout(
 
   const run = spawnSync('sh', [scriptPath, dir], {
     encoding: 'utf-8',
-    env: { ...process.env, INSFORGE_NO_GIT: '1' },
+    env: { ...process.env, YARAH_NO_GIT: '1' },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   if (run.error && (run.error as NodeJS.ErrnoException).code === 'ENOENT') {
     // Plain Windows has no `sh`. Docker Desktop there runs on WSL2 anyway, so
     // the shell is one terminal away rather than a missing dependency.
     throw new CLIError(
-      'No `sh` on PATH, so InsForge\'s setup script cannot run.\n\n' +
-        'On Windows, run `insforge local start` from WSL or Git Bash.',
+      'No `sh` on PATH, so Yarah\'s setup script cannot run.\n\n' +
+        'On Windows, run `yarah local start` from WSL or Git Bash.',
     );
   }
   if (run.status !== 0) {
     throw new CLIError(
-      'InsForge\'s setup script failed.\n' +
+      'Yarah\'s setup script failed.\n' +
         (run.stderr?.trim() || run.stdout?.trim() || '(no output)'),
     );
   }

@@ -76,7 +76,7 @@ const UNCLASSIFIED: RiskAssessment = {
   kind: 'sql.unclassified',
   title: 'Unrecognized statement (not a read)',
   whatHappens: 'This is not a recognized read-only query, so it may modify data, schema, privileges, or run a command on the host.',
-  blastRadius: 'Unknown — InsForge could not classify it. Review the exact SQL before approving.',
+  blastRadius: 'Unknown — Yarah could not classify it. Review the exact SQL before approving.',
   risk: 'Anything that is not a plain SELECT/EXPLAIN/SHOW is gated by default (fail-closed).',
 };
 
@@ -221,7 +221,7 @@ const REGISTRY: Record<string, (ctx: OperationContext) => RiskAssessment> = {
           kind: 'local.delete_data',
           title: 'Delete all data in the local instance',
           whatHappens:
-            'Stops the local InsForge containers and removes their volumes: database, storage objects, and logs.',
+            'Stops the local Yarah containers and removes their volumes: database, storage objects, and logs.',
           blastRadius: 'Every table, row, and uploaded file in this directory\u2019s local backend.',
           risk: 'Irreversible. Local instances have no backups — nothing restores this.',
         }
@@ -276,7 +276,7 @@ const REGISTRY: Record<string, (ctx: OperationContext) => RiskAssessment> = {
     severity: 'high',
     kind: 'project.update_version',
     title: 'Update the backend version',
-    whatHappens: 'Restarts the project onto the latest InsForge version.',
+    whatHappens: 'Restarts the project onto the latest Yarah version.',
     blastRadius: 'The instance restarts — brief downtime, and a version change can alter behavior.',
     risk: 'Live traffic is interrupted during the restart. Roll-back means restarting again.',
   }),
@@ -403,7 +403,7 @@ export function applyAgentFlag(risk: RiskAssessment, flagged: boolean): RiskAsse
     kind: 'agent.flagged',
     title: 'Agent-flagged operation',
     whatHappens: 'The calling agent flagged this operation as potentially destructive.',
-    blastRadius: 'Not classified by InsForge’s hard rules — review the command and the agent’s reason.',
+    blastRadius: 'Not classified by Yarah’s hard rules — review the command and the agent’s reason.',
     risk: 'Flagged by the agent for human review.',
   };
 }

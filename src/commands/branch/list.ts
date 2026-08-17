@@ -16,7 +16,7 @@ export function registerBranchListCommand(branch: Command): void {
         await requireAuth(apiUrl);
         const project = getProjectConfig();
         if (!project) {
-          throw new CLIError('No project linked. Run `insforge link` first.');
+          throw new CLIError('No project linked. Run `yarah link` first.');
         }
         // If currently switched onto a branch, list siblings of its parent.
         const parentId = project.branched_from?.project_id ?? project.project_id;

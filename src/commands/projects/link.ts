@@ -68,7 +68,7 @@ async function runNpmSetupIfPresent(): Promise<void> {
 export function registerProjectLinkCommand(program: Command): void {
   program
     .command('link')
-    .description('Link current directory to an InsForge project (no args: installs agent skills only)')
+    .description('Link current directory to an Yarah project (no args: installs agent skills only)')
     .option('--project-id <id>', 'Project ID to link')
     .option('--org-id <id>', 'Organization ID')
     .option('--template <template>', 'Download a template after linking: react, nextjs, chatbot, crm, e-commerce, todo')
@@ -81,7 +81,7 @@ export function registerProjectLinkCommand(program: Command): void {
 
       // `--guard` (or `--guard on`) enables the HITL guard for this project;
       // `--guard off`/`false` disables it. Absent → leave the setting untouched.
-      // Persisted into .insforge/project.json; INSFORGE_GUARD env still overrides.
+      // Persisted into .yarah/project.json; YARAH_GUARD env still overrides.
       let guardSetting: boolean | undefined;
       if (opts.guard !== undefined) {
         const g = String(opts.guard).toLowerCase();
@@ -92,7 +92,7 @@ export function registerProjectLinkCommand(program: Command): void {
         saveProjectConfig(cfg);
       };
 
-      // Every template value accepted here is a directory in the InsForge
+      // Every template value accepted here is a directory in the Yarah
       // templates repo, so validation and the download call reference the
       // same single list.
       const validTemplates = ['react', 'nextjs', 'chatbot', 'crm', 'e-commerce', 'todo'];
@@ -112,8 +112,8 @@ export function registerProjectLinkCommand(program: Command): void {
 
         // Skills-only fast path: bare `link` with no args installs agent skills
         // into the current directory without auth, org/project picker, or
-        // writing .insforge/project.json. The agent walks the user through
-        // provisioning later, when it actually needs InsForge backend services.
+        // writing .yarah/project.json. The agent walks the user through
+        // provisioning later, when it actually needs Yarah backend services.
         const isSkillsOnly =
           opts.projectId === undefined &&
           opts.orgId === undefined &&
@@ -132,7 +132,7 @@ export function registerProjectLinkCommand(program: Command): void {
               outputJson({ success: true, skills_only: true });
             } else {
               clack.note(
-                `Open your coding agent (Claude Code, Codex, Cursor, etc.) and ask it to build something. It will walk you through provisioning an InsForge project when needed. If you're not signed in yet, your browser will open for sign-in at that point.`,
+                `Open your coding agent (Claude Code, Codex, Cursor, etc.) and ask it to build something. It will walk you through provisioning an Yarah project when needed. If you're not signed in yet, your browser will open for sign-in at that point.`,
                 "What's next",
               );
             }
@@ -173,7 +173,7 @@ export function registerProjectLinkCommand(program: Command): void {
             // Template path: create a subdirectory, link inside it, download template,
             // install deps. Mirrors the OAuth template flow below.
             if (template) {
-              const defaultDir = `insforge-${template}`;
+              const defaultDir = `yarah-${template}`;
               let dirName = defaultDir;
               if (!json) {
                 const inputDir = await prompts.text({
@@ -249,7 +249,7 @@ export function registerProjectLinkCommand(program: Command): void {
 
               // Report agent-connected event (best-effort)
               try {
-                const urlMatch = opts.apiBaseUrl.match(/^https?:\/\/([^.]+)\.[^.]+\.insforge\.app/);
+                const urlMatch = opts.apiBaseUrl.match(/^https?:\/\/([^.]+)\.[^.]+\.yarah\.app/);
                 if (urlMatch) {
                   await reportAgentConnected({ app_key: urlMatch[1] }, apiUrl);
                 }
@@ -310,7 +310,7 @@ export function registerProjectLinkCommand(program: Command): void {
 
             // Report agent-connected event (best-effort)
             try {
-              const urlMatch = opts.apiBaseUrl.match(/^https?:\/\/([^.]+)\.[^.]+\.insforge\.app/);
+              const urlMatch = opts.apiBaseUrl.match(/^https?:\/\/([^.]+)\.[^.]+\.yarah\.app/);
               if (urlMatch) {
                 await reportAgentConnected({ app_key: urlMatch[1] }, apiUrl);
               }
@@ -390,7 +390,7 @@ export function registerProjectLinkCommand(program: Command): void {
           if (err instanceof CLIError && (err.exitCode === 5 || err.exitCode === 4 || err.message.includes('not found'))) {
             const identity = creds.user?.email ?? creds.user?.name ?? 'unknown user';
             throw new CLIError(
-              `No access to project ${projectId} as ${identity}. Double-check the project ID, or run \`npx @insforge/cli logout\` to switch accounts.`,
+              `No access to project ${projectId} as ${identity}. Double-check the project ID, or run \`npx @yarahdev/cli logout\` to switch accounts.`,
               5,
               'PERMISSION_DENIED',
             );

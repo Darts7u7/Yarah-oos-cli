@@ -76,7 +76,7 @@ describe('branch list', () => {
       appkey: 'k',
       region: 'us-east',
       api_key: 'key',
-      oss_host: 'k.us-east.insforge.app',
+      oss_host: 'k.us-east.apps.yarah.dev',
     });
     const program = makeProgram();
     await runWithCapturedLog(program, ['list', '--json']);
@@ -93,7 +93,7 @@ describe('branch list', () => {
       appkey: 'k1',
       region: 'us-east',
       api_key: 'key',
-      oss_host: 'k1.us-east.insforge.app',
+      oss_host: 'k1.us-east.apps.yarah.dev',
       branched_from: { project_id: 'p1', project_name: 'parent' },
     });
     const program = makeProgram();
@@ -126,7 +126,7 @@ describe('branch list', () => {
       appkey: 'k1',
       region: 'us-east',
       api_key: 'key',
-      oss_host: 'k1.us-east.insforge.app',
+      oss_host: 'k1.us-east.apps.yarah.dev',
       branched_from: { project_id: 'p1', project_name: 'parent' },
     });
     const program = makeProgram();

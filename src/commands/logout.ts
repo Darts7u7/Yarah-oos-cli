@@ -7,7 +7,7 @@ import { trackTopLevelUsage } from '../lib/command-telemetry.js';
 export function registerLogoutCommand(program: Command): void {
   program
     .command('logout')
-    .description('Log out from InsForge platform')
+    .description('Log out from Yarah platform')
     .action(async (_opts, cmd) => {
       const { json } = getRootOpts(cmd);
       try {

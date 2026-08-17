@@ -80,7 +80,7 @@ beforeEach(() => {
   nextStorageConfigResponse = undefined;
   nextRealtimeConfigResponse = undefined;
   nextSchedulesConfigResponse = undefined;
-  tmp = mkdtempSync(join(tmpdir(), 'insforge-export-test-'));
+  tmp = mkdtempSync(join(tmpdir(), 'yarah-export-test-'));
 });
 
 describe('config export (capability probe)', () => {
@@ -100,7 +100,7 @@ describe('config export (capability probe)', () => {
         },
       },
     };
-    const target = join(tmp, 'insforge.toml');
+    const target = join(tmp, 'yarah.toml');
     const program = makeProgram();
     const docs = await runJson(program, [
       '--json',
@@ -152,7 +152,7 @@ describe('config export (capability probe)', () => {
     nextRealtimeConfigResponse = { retentionDays: null };
     nextSchedulesConfigResponse = { retentionDays: 14 };
 
-    const target = join(tmp, 'insforge.toml');
+    const target = join(tmp, 'yarah.toml');
     const program = makeProgram();
     const docs = await runJson(program, [
       '--json',
@@ -201,7 +201,7 @@ describe('config export (capability probe)', () => {
     nextRealtimeConfigResponse = new CLIError('OSS request failed: 404', 1, undefined, 404);
     nextSchedulesConfigResponse = { retentionDays: 14 };
 
-    const target = join(tmp, 'insforge.toml');
+    const target = join(tmp, 'yarah.toml');
     const program = makeProgram();
     const docs = await runJson(program, [
       '--json',
@@ -246,7 +246,7 @@ describe('config export (capability probe)', () => {
         },
       },
     };
-    const target = join(tmp, 'insforge.toml');
+    const target = join(tmp, 'yarah.toml');
     const program = makeProgram();
     const docs = await runJson(program, [
       '--json',
@@ -265,7 +265,7 @@ describe('config export (capability probe)', () => {
 
     const written = readFileSync(target, 'utf8');
     expect(written).toContain('password = "env(SMTP_PASSWORD)"');
-    expect(written).toContain('insforge secrets add SMTP_PASSWORD');
+    expect(written).toContain('yarah secrets add SMTP_PASSWORD');
 
     rmSync(tmp, { recursive: true, force: true });
   });
@@ -286,7 +286,7 @@ describe('config export (capability probe)', () => {
         },
       },
     };
-    const target = join(tmp, 'insforge.toml');
+    const target = join(tmp, 'yarah.toml');
     const program = makeProgram();
     const docs = await runJson(program, [
       '--json',
@@ -310,7 +310,7 @@ describe('config export (capability probe)', () => {
 
   it('omits sections and reports skipped when fields are absent (older backend)', async () => {
     nextMetadataResponse = { auth: { someOtherField: 'x' } };
-    const target = join(tmp, 'insforge.toml');
+    const target = join(tmp, 'yarah.toml');
     const program = makeProgram();
     const docs = await runJson(program, [
       '--json',
@@ -347,7 +347,7 @@ describe('config export (capability probe)', () => {
       auth: { allowedRedirectUrls: [] },
       deployments: { customSlug: 'my-app' },
     };
-    const target = join(tmp, 'insforge.toml');
+    const target = join(tmp, 'yarah.toml');
     const program = makeProgram();
     const docs = await runJson(program, [
       '--json',
@@ -392,7 +392,7 @@ describe('config export (capability probe)', () => {
       auth: { allowedRedirectUrls: [] },
       deployments: { customSlug: null },
     };
-    const target = join(tmp, 'insforge.toml');
+    const target = join(tmp, 'yarah.toml');
     const program = makeProgram();
     const docs = await runJson(program, [
       '--json',

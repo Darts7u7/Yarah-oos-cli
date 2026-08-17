@@ -1,7 +1,7 @@
 /**
  * Human-in-the-loop guard — a `preAction` stage in the CLI dispatch pipeline.
  *
- * Because it lives inside the `insforge` binary itself (not in any agent's
+ * Because it lives inside the `yarah` binary itself (not in any agent's
  * harness), it protects EVERY caller automatically: Claude Code, Cursor, a
  * shell script, CI, or a human. Dangerous operations stop, a human-readable
  * brief is shown on a localhost page, and the command only runs if a human
@@ -30,14 +30,14 @@ function commandPath(cmd: Command): string {
 
 /**
  * Whether to require an agent brief before showing the approval page.
- *  - INSFORGE_GUARD_REQUIRE_BRIEF=1 → always require (even for a human at a TTY)
- *  - INSFORGE_GUARD_REQUIRE_BRIEF=0 → never require (go straight to the page)
+ *  - YARAH_GUARD_REQUIRE_BRIEF=1 → always require (even for a human at a TTY)
+ *  - YARAH_GUARD_REQUIRE_BRIEF=0 → never require (go straight to the page)
  *  - unset → require for non-interactive callers (agents, CI), not for humans.
  * The point is to make the calling agent reason about the change and present its
  * intent readably, rather than silently bouncing the human a bare command.
  */
 function shouldRequireBrief(): boolean {
-  const env = process.env.INSFORGE_GUARD_REQUIRE_BRIEF;
+  const env = process.env.YARAH_GUARD_REQUIRE_BRIEF;
   if (env === '1') return true;
   if (env === '0') return false;
   // "Is a human at the keyboard?" — keyed on stdin, not stdout. stdout is often
@@ -52,10 +52,10 @@ function shouldRequireBrief(): boolean {
  * produce one. The hard-rule STOP still applies on the re-run.
  */
 function renderNudge(command: string, risk: RiskAssessment): string {
-  const sub = command.replace(/^npx @insforge\/cli\s*/, '');
+  const sub = command.replace(/^npx @yarah\/cli\s*/, '');
   return [
     '',
-    '  🛑 InsForge guard — destructive operation detected (NOT run):',
+    '  🛑 Yarah guard — destructive operation detected (NOT run):',
     `       ${command}`,
     `       [${risk.severity} · ${risk.kind}] ${risk.title}`,
     '',
@@ -64,7 +64,7 @@ function renderNudge(command: string, risk: RiskAssessment): string {
     '',
     '  Re-run the SAME command with a human-readable brief:',
     '',
-    '    npx @insforge/cli \\',
+    '    npx @yarahdev/cli \\',
     '      --reason         "what this does and why" \\',
     '      --impact         "who/what is affected · data loss · reversibility" \\',
     '      --recommendation "your recommendation to the approver" \\',
@@ -85,7 +85,7 @@ function renderNudge(command: string, risk: RiskAssessment): string {
  */
 export async function guardHook(thisCommand: Command, actionCommand: Command): Promise<void> {
   // Rollout switch: disabled by default so shipping is a no-op until opted in.
-  // Precedence: INSFORGE_GUARD env > persisted `link --guard` setting > default.
+  // Precedence: YARAH_GUARD env > persisted `link --guard` setting > default.
   let storedGuard: boolean | null = null;
   try { storedGuard = getProjectConfig()?.guard ?? null; } catch { /* fail to default */ }
   if (!guardEnabled(process.env, storedGuard)) return;
@@ -112,13 +112,13 @@ export async function guardHook(thisCommand: Command, actionCommand: Command): P
   // like `--unrestricted` aren't dropped — otherwise the echoed/nudge/audit command
   // could misrepresent or re-run a different operation. Quote tokens with spaces.
   const quote = (a: string) => (/\s/.test(a) ? `"${a}"` : a);
-  const command = `npx @insforge/cli ${process.argv.slice(2).map(quote).join(' ')}`.trim();
+  const command = `npx @yarahdev/cli ${process.argv.slice(2).map(quote).join(' ')}`.trim();
   const base = { ts: new Date().toISOString(), path, command, kind: effective.kind, severity: effective.severity };
 
   // Explicit, audited bypass for automation that has opted in.
-  if (process.env.INSFORGE_GUARD_BYPASS === '1') {
+  if (process.env.YARAH_GUARD_BYPASS === '1') {
     audit({ ...base, decision: 'bypassed' });
-    process.stderr.write('  ⚠️  Guard bypassed via INSFORGE_GUARD_BYPASS (audited).\n');
+    process.stderr.write('  ⚠️  Guard bypassed via YARAH_GUARD_BYPASS (audited).\n');
     return;
   }
 
@@ -128,10 +128,10 @@ export async function guardHook(thisCommand: Command, actionCommand: Command): P
   // verdict. Flags take precedence over env fallbacks.
   const gopts = thisCommand.opts();
   const agent: AgentBrief = {
-    reason: (gopts.reason as string | undefined) ?? process.env.INSFORGE_GUARD_SUMMARY ?? null,
-    impact: (gopts.impact as string | undefined) ?? process.env.INSFORGE_GUARD_IMPACT ?? null,
+    reason: (gopts.reason as string | undefined) ?? process.env.YARAH_GUARD_SUMMARY ?? null,
+    impact: (gopts.impact as string | undefined) ?? process.env.YARAH_GUARD_IMPACT ?? null,
     recommendation:
-      (gopts.recommendation as string | undefined) ?? process.env.INSFORGE_GUARD_RECOMMENDATION ?? null,
+      (gopts.recommendation as string | undefined) ?? process.env.YARAH_GUARD_RECOMMENDATION ?? null,
   };
 
   // Encourage the local LLM to articulate intent: if no explanation was given

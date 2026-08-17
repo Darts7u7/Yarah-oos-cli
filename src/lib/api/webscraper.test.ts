@@ -188,12 +188,12 @@ describe('storeApifyToken', () => {
 
   it('propagates the cloud-managed message on a cloud project', async () => {
     vi.spyOn(oss, 'ossFetch').mockRejectedValue(
-      new CLIError('The Apify connection is managed by InsForge Cloud.', 1, 'INVALID_INPUT', 400),
+      new CLIError('The Apify connection is managed by Yarah Cloud.', 1, 'INVALID_INPUT', 400),
     );
 
     const { storeApifyToken } = await import('./webscraper.js');
 
-    await expect(storeApifyToken('apify_api_tok1234567890')).rejects.toThrow(/InsForge Cloud/);
+    await expect(storeApifyToken('apify_api_tok1234567890')).rejects.toThrow(/Yarah Cloud/);
   });
 
   it('fails loudly when the response carries no token status', async () => {

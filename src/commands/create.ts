@@ -27,8 +27,8 @@ import type { ProjectConfig } from '../types.js';
 const execAsync = promisify(exec);
 const execFileAsync = promisify(execFile);
 
-// Same safety guard fetchProviderTree uses in apply.ts. INSFORGE_TEMPLATES_REPO
-// and INSFORGE_TEMPLATES_BRANCH are escape hatches for development against
+// Same safety guard fetchProviderTree uses in apply.ts. YARAH_TEMPLATES_REPO
+// and YARAH_TEMPLATES_BRANCH are escape hatches for development against
 // unmerged branches; they are passed to git's argv (no shell), but we still
 // validate the values so a hostile env var can't slip in extra git options.
 const SAFE_REPO_PATTERN = /^(https?:\/\/|git@)[A-Za-z0-9._:/@~+-]+(\.git)?$/;
@@ -47,7 +47,7 @@ async function waitForProjectActive(projectId: string, apiUrl?: string, timeoutM
   throw new CLIError('Project creation timed out. Check the dashboard for status.');
 }
 
-const INSFORGE_BANNER = [
+const YARAH_BANNER = [
   '██╗███╗   ██╗███████╗███████╗ ██████╗ ██████╗  ██████╗ ███████╗',
   '██║████╗  ██║██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝ ██╔════╝',
   '██║██╔██╗ ██║███████╗█████╗  ██║   ██║██████╔╝██║  ███╗█████╗  ',
@@ -60,20 +60,20 @@ async function animateBanner(): Promise<void> {
   const isTTY = process.stderr.isTTY;
   if (!isTTY || process.env.CI) {
     // Non-interactive: just print static banner
-    for (const line of INSFORGE_BANNER) {
+    for (const line of YARAH_BANNER) {
       process.stderr.write(`${line}\n`);
     }
     process.stderr.write('\n');
     return;
   }
 
-  const totalLines = INSFORGE_BANNER.length;
-  const maxLen = Math.max(...INSFORGE_BANNER.map((l) => l.length));
+  const totalLines = YARAH_BANNER.length;
+  const maxLen = Math.max(...YARAH_BANNER.map((l) => l.length));
   const cols = process.stderr.columns ?? 0;
 
   // Narrow terminal: skip animation to avoid garbled output from line wrapping
   if (cols > 0 && cols < maxLen) {
-    for (const line of INSFORGE_BANNER) {
+    for (const line of YARAH_BANNER) {
       process.stderr.write(`\x1b[97m${line}\x1b[0m\n`);
     }
     process.stderr.write('\n');
@@ -84,7 +84,7 @@ async function animateBanner(): Promise<void> {
   const REVEAL_STEPS = 10;
   const REVEAL_DELAY = 30;
   for (let lineIdx = 0; lineIdx < totalLines; lineIdx++) {
-    const line = INSFORGE_BANNER[lineIdx];
+    const line = YARAH_BANNER[lineIdx];
     for (let step = 0; step <= REVEAL_STEPS; step++) {
       const pos = Math.floor((step / REVEAL_STEPS) * line.length);
       let rendered = '';
@@ -111,7 +111,7 @@ async function animateBanner(): Promise<void> {
     const shimmerPos = Math.floor((step / SHIMMER_STEPS) * (maxLen + SHIMMER_WIDTH));
     // Move cursor up to start of banner
     process.stderr.write(`\x1b[${totalLines}A`);
-    for (const line of INSFORGE_BANNER) {
+    for (const line of YARAH_BANNER) {
       let rendered = '';
       for (let i = 0; i < line.length; i++) {
         const dist = Math.abs(i - shimmerPos);
@@ -130,7 +130,7 @@ async function animateBanner(): Promise<void> {
 
   // Final: show banner in steady bright white
   process.stderr.write(`\x1b[${totalLines}A`);
-  for (const line of INSFORGE_BANNER) {
+  for (const line of YARAH_BANNER) {
     process.stderr.write(`\x1b[97m${line}\x1b[0m\n`);
   }
   process.stderr.write('\n');
@@ -159,12 +159,12 @@ export async function copyDir(src: string, dest: string): Promise<void> {
 export function registerCreateCommand(program: Command): void {
   program
     .command('create')
-    .description('Create a new InsForge project')
+    .description('Create a new Yarah project')
     .option('--name <name>', 'Project name')
     .option('--org-id <id>', 'Organization ID')
     .option('--region <region>', 'Deployment region (us-east, us-west, eu-central, ap-southeast)')
     .option('--template <template>', 'Template to use: react, nextjs, chatbot, crm, e-commerce, todo, or empty')
-    .option('--marketplace <slug>', 'Install a marketplace template by slug (browse: https://insforge.dev/templates)')
+    .option('--marketplace <slug>', 'Install a marketplace template by slug (browse: https://yarah.dev/templates)')
     .option('--auth <provider>', 'Wire a third-party auth provider into the chosen template (currently: better-auth)')
     .action(async (opts, cmd) => {
       const { json, apiUrl } = getRootOpts(cmd);
@@ -180,7 +180,7 @@ export function registerCreateCommand(program: Command): void {
         if (opts.marketplace && !SAFE_MARKETPLACE_SLUG.test(opts.marketplace as string)) {
           throw new CLIError(
             `Invalid --marketplace slug "${opts.marketplace}". Slugs must match ${SAFE_MARKETPLACE_SLUG}.\n` +
-              `Browse available templates: https://insforge.dev/templates`,
+              `Browse available templates: https://yarah.dev/templates`,
           );
         }
         await requireAuth(apiUrl, false);
@@ -392,7 +392,7 @@ export function registerCreateCommand(program: Command): void {
         } else if (hasTemplate) {
           await downloadTemplate(template as Framework, projectConfig, projectName, json, apiUrl);
         } else {
-          // Blank project: seed .env.local with InsForge credentials (non-fatal)
+          // Blank project: seed .env.local with Yarah credentials (non-fatal)
           try {
             const anonKey = await getAnonKey();
             if (!anonKey) {
@@ -400,21 +400,21 @@ export function registerCreateCommand(program: Command): void {
             } else {
               const envPath = path.join(process.cwd(), '.env.local');
               const envContent = [
-                '# InsForge',
-                `NEXT_PUBLIC_INSFORGE_URL=${projectConfig.oss_host}`,
-                `NEXT_PUBLIC_INSFORGE_ANON_KEY=${anonKey}`,
+                '# Yarah',
+                `NEXT_PUBLIC_YARAH_URL=${projectConfig.oss_host}`,
+                `NEXT_PUBLIC_YARAH_ANON_KEY=${anonKey}`,
                 '',
               ].join('\n');
               await fs.writeFile(envPath, envContent, { flag: 'wx' });
               if (!json) {
-                clack.log.success('Created .env.local with your InsForge credentials');
+                clack.log.success('Created .env.local with your Yarah credentials');
               }
             }
           } catch (err) {
             const error = err as NodeJS.ErrnoException;
             if (!json) {
               if (error.code === 'EEXIST') {
-                clack.log.warn('.env.local already exists; skipping InsForge key seeding.');
+                clack.log.warn('.env.local already exists; skipping Yarah key seeding.');
               } else {
                 clack.log.warn(`Failed to create .env.local: ${error.message}`);
               }
@@ -424,7 +424,7 @@ export function registerCreateCommand(program: Command): void {
 
         // 7b. If --auth was passed, overlay the auth-provider scaffold onto
         // whatever the template (or blank project) produced. Auth-provider
-        // scaffolds are fetched from the InsForge templates repo at runtime
+        // scaffolds are fetched from the Yarah templates repo at runtime
         // (auth-providers/<name>/), not bundled with the CLI.
         if (opts.auth) {
           try {
@@ -494,7 +494,7 @@ export function registerCreateCommand(program: Command): void {
                 deploySpinner.stop('Deployment is still building');
                 clack.log.info(`Deployment ID: ${result.deploymentId}`);
                 clack.log.warn('Deployment did not finish within 2 minutes.');
-                clack.log.info(`Check status with: npx @insforge/cli deployments status ${result.deploymentId}`);
+                clack.log.info(`Check status with: npx @yarahdev/cli deployments status ${result.deploymentId}`);
               }
             } catch (err) {
               clack.log.warn(`Deploy failed: ${(err as Error).message}`);
@@ -593,9 +593,9 @@ export async function downloadTemplate(
 
     const frame = framework === 'nextjs' ? 'nextjs' : 'react';
     const esc = (s: string) => process.platform === 'win32' ? `"${s.replace(/"/g, '\\"')}"` : `'${s.replace(/'/g, "'\\''")}'`;
-    const command = `npx --yes create-insforge-app@latest ${esc(targetDir)} --frame ${frame} --base-url ${esc(projectConfig.oss_host)} --anon-key ${esc(anonKey)} --skip-install`;
+    const command = `npx --yes create.apps.yarah.dev@latest ${esc(targetDir)} --frame ${frame} --base-url ${esc(projectConfig.oss_host)} --anon-key ${esc(anonKey)} --skip-install`;
 
-    s?.message(`Running create-insforge-app (${frame})...`);
+    s?.message(`Running create.apps.yarah.dev (${frame})...`);
 
     await execAsync(command, {
       maxBuffer: 10 * 1024 * 1024,
@@ -628,22 +628,22 @@ export async function downloadGitHubTemplate(
   const s = !json ? clack.spinner() : null;
   s?.start(`Downloading ${templateName} template...`);
 
-  const tempDir = path.join(tmpdir(), `insforge-template-${Date.now()}`);
+  const tempDir = path.join(tmpdir(), `yarah-template-${Date.now()}`);
 
   try {
     await fs.mkdir(tempDir, { recursive: true });
 
-    // Shallow clone the templates repo. INSFORGE_TEMPLATES_REPO + INSFORGE_TEMPLATES_BRANCH
+    // Shallow clone the templates repo. YARAH_TEMPLATES_REPO + YARAH_TEMPLATES_BRANCH
     // are escape hatches for development against unmerged template branches.
     // Validated against safe-character patterns and passed via argv (execFile),
     // not a shell string, so a hostile env var can't inject extra git options.
-    const templatesRepo = process.env.INSFORGE_TEMPLATES_REPO ?? 'https://github.com/InsForge/insforge-templates.git';
+    const templatesRepo = process.env.YARAH_TEMPLATES_REPO ?? 'https://github.com/Darts7u7/Yarah-oos-templates.git';
     if (!SAFE_REPO_PATTERN.test(templatesRepo)) {
-      throw new Error(`INSFORGE_TEMPLATES_REPO has unsupported characters: ${templatesRepo}`);
+      throw new Error(`YARAH_TEMPLATES_REPO has unsupported characters: ${templatesRepo}`);
     }
-    const templatesBranch = process.env.INSFORGE_TEMPLATES_BRANCH;
+    const templatesBranch = process.env.YARAH_TEMPLATES_BRANCH;
     if (templatesBranch !== undefined && !SAFE_BRANCH_PATTERN.test(templatesBranch)) {
-      throw new Error(`INSFORGE_TEMPLATES_BRANCH has unsupported characters: ${templatesBranch}`);
+      throw new Error(`YARAH_TEMPLATES_BRANCH has unsupported characters: ${templatesBranch}`);
     }
     const cloneArgs = ['clone', '--depth', '1'];
     if (templatesBranch) cloneArgs.push('-b', templatesBranch);
@@ -665,7 +665,7 @@ export async function downloadGitHubTemplate(
     const cwd = process.cwd();
     await copyDir(templateDir, cwd);
 
-    // Write .env.local from .env.example with InsForge credentials filled in
+    // Write .env.local from .env.example with Yarah credentials filled in
     const envExamplePath = path.join(cwd, '.env.example');
     const envExampleExists = await fs.stat(envExamplePath).catch(() => null);
     if (envExampleExists) {
@@ -675,9 +675,9 @@ export async function downloadGitHubTemplate(
         /^([A-Z][A-Z0-9_]*=)(.*)$/gm,
         (_, prefix: string, _value: string) => {
           const key = prefix.slice(0, -1); // remove trailing '='
-          if (/INSFORGE.*(URL|BASE_URL)$/.test(key)) return `${prefix}${projectConfig.oss_host}`;
-          if (/INSFORGE.*ANON_KEY$/.test(key)) return `${prefix}${anonKey}`;
-          if (key === 'NEXT_PUBLIC_APP_URL') return `${prefix}https://${projectConfig.appkey}.insforge.site`;
+          if (/YARAH.*(URL|BASE_URL)$/.test(key)) return `${prefix}${projectConfig.oss_host}`;
+          if (/YARAH.*ANON_KEY$/.test(key)) return `${prefix}${anonKey}`;
+          if (key === 'NEXT_PUBLIC_APP_URL') return `${prefix}https://${projectConfig.appkey}.yarah.dev`;
           return `${prefix}${_value}`;
         },
       );
@@ -714,7 +714,7 @@ export async function downloadGitHubTemplate(
         dbSpinner?.stop('Database migration failed');
         if (!json) {
           clack.log.warn(`Migration failed: ${(err as Error).message}`);
-          clack.log.info('You can run the migration manually: npx @insforge/cli db query "$(cat migrations/db_init.sql)"');
+          clack.log.info('You can run the migration manually: npx @yarahdev/cli db query "$(cat migrations/db_init.sql)"');
         } else {
           throw err;
         }
@@ -733,7 +733,7 @@ export async function downloadGitHubTemplate(
       console.error(JSON.stringify({ warning: msg }));
     } else {
       clack.log.warn(msg);
-      clack.log.info('You can manually clone from: https://github.com/InsForge/insforge-templates');
+      clack.log.info('You can manually clone from: https://github.com/Darts7u7/Yarah-oos-templates');
     }
     return false;
   } finally {
@@ -741,13 +741,13 @@ export async function downloadGitHubTemplate(
   }
 }
 
-// TemplateMarket is a single-tenant InsForge project hosted independently
+// TemplateMarket is a single-tenant Yarah project hosted independently
 // of any per-user backend, so the counter URL is a constant rather than
 // derived from `apiUrl`. The function takes only {slug}; auth + RPC
 // dispatch is handled inside the edge function (no anon key needed here).
 const MARKETPLACE_REPORT_URL =
-  process.env.INSFORGE_MARKETPLACE_REPORT_URL ??
-  'https://p8n7m7ci.us-east.insforge.app/functions/report-download';
+  process.env.YARAH_MARKETPLACE_REPORT_URL ??
+  'https://p8n7m7ci.us-east.apps.yarah.dev/functions/report-download';
 
 /**
  * Fire-and-forget POST to the marketplace download counter.

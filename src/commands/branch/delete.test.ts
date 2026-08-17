@@ -97,7 +97,7 @@ describe('branch delete', () => {
       appkey: 'k1',
       region: 'us-east',
       api_key: 'key',
-      oss_host: 'k1.us-east.insforge.app',
+      oss_host: 'k1.us-east.apps.yarah.dev',
       branched_from: { project_id: 'p1', project_name: 'parent' },
     });
     const program = makeProgram();

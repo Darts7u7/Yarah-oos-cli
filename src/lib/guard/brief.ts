@@ -34,7 +34,7 @@ export interface Brief {
   whatHappens: string;
   blastRadius: string;
   risks: string[];
-  /** InsForge's own (rule-derived) guidance to the approver. */
+  /** Yarah's own (rule-derived) guidance to the approver. */
   guidance: string;
   /** The exact command the agent is about to run. */
   command: string;

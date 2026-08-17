@@ -11,9 +11,9 @@ import type { StoredCredentials, User } from '../types.js';
 export function registerLoginCommand(program: Command): void {
   program
     .command('login')
-    .description('Authenticate with InsForge platform')
+    .description('Authenticate with Yarah platform')
     .option('--email', 'Login with email and password instead of browser')
-    .option('--client-id <id>', 'OAuth client ID (defaults to insforge-cli)')
+    .option('--client-id <id>', 'OAuth client ID (defaults to yarah-cli)')
     .option('--user-api-key <key>', 'Authenticate with a uak_ user API key')
     .option('--device', 'Device login: approve a short code on the dashboard while the CLI polls — for sandboxes/SSH/containers where the browser cannot reach this process')
     .action(async (opts, cmd) => {
@@ -52,11 +52,11 @@ export function registerLoginCommand(program: Command): void {
 
 async function loginWithEmail(json: boolean, apiUrl?: string): Promise<void> {
   if (!json) {
-    clack.intro('InsForge CLI');
+    clack.intro('Yarah CLI');
   }
 
   const email = json
-    ? process.env.INSFORGE_EMAIL
+    ? process.env.YARAH_EMAIL
     : await prompts.text({
         message: 'Email:',
         validate: (v) => (v.includes('@') ? undefined : 'Please enter a valid email'),
@@ -68,7 +68,7 @@ async function loginWithEmail(json: boolean, apiUrl?: string): Promise<void> {
   }
 
   const password = json
-    ? process.env.INSFORGE_PASSWORD
+    ? process.env.YARAH_PASSWORD
     : await prompts.password({
         message: 'Password:',
       });
@@ -79,7 +79,7 @@ async function loginWithEmail(json: boolean, apiUrl?: string): Promise<void> {
   }
 
   if (!email || !password) {
-    throw new Error('Email and password are required. Set INSFORGE_EMAIL and INSFORGE_PASSWORD environment variables for non-interactive mode.');
+    throw new Error('Email and password are required. Set YARAH_EMAIL and YARAH_PASSWORD environment variables for non-interactive mode.');
   }
 
   if (!json) {
@@ -115,7 +115,7 @@ async function loginWithEmail(json: boolean, apiUrl?: string): Promise<void> {
  */
 async function loginWithDevice(json: boolean, apiUrl?: string): Promise<void> {
   if (!json) {
-    clack.intro('InsForge CLI');
+    clack.intro('Yarah CLI');
   }
 
   const creds = await performDeviceLogin(apiUrl);
@@ -129,7 +129,7 @@ async function loginWithDevice(json: boolean, apiUrl?: string): Promise<void> {
 
 async function loginWithOAuth(json: boolean, apiUrl?: string): Promise<void> {
   if (!json) {
-    clack.intro('InsForge CLI');
+    clack.intro('Yarah CLI');
   }
 
   const creds = await performOAuthLogin(apiUrl);
@@ -152,7 +152,7 @@ async function loginWithUserApiKey(
   apiUrl?: string,
 ): Promise<void> {
   if (!json) {
-    clack.intro('InsForge CLI');
+    clack.intro('Yarah CLI');
   }
 
   if (!key.startsWith('uak_')) {

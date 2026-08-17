@@ -30,8 +30,8 @@ import { getProjectConfig } from '../../lib/config.js';
 export function registerConfigApplyCommand(cfg: Command): void {
   cfg
     .command('apply')
-    .description('Apply insforge.toml to the live project')
-    .option('--file <path>', 'path to insforge.toml', 'insforge.toml')
+    .description('Apply yarah.toml to the live project')
+    .option('--file <path>', 'path to yarah.toml', 'yarah.toml')
     .option('--dry-run', 'show plan, do not apply')
     .option('--auto-approve', 'skip confirmation prompt')
     .action(async (opts, cmd) => {

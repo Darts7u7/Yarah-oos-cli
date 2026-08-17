@@ -40,7 +40,7 @@ import type {
   UpdateStripeProductBody,
   UpsertRazorpayConfigBody,
   UpsertStripeConfigBody,
-} from "@insforge/shared-schemas";
+} from "@yarahdev/shared-schemas";
 
 type ListPaymentCustomersQuery = Partial<
   Omit<ListPaymentCustomersRequest, "environment">

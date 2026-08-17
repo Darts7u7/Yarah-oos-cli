@@ -44,13 +44,13 @@ export function registerBranchCreateCommand(branch: Command): void {
         await requireAuth(apiUrl);
         const project = getProjectConfig();
         if (!project) {
-          throw new CLIError('No project linked. Run `insforge link` first.');
+          throw new CLIError('No project linked. Run `yarah link` first.');
         }
         // Disallow nested branching at the CLI layer (cloud-backend rejects too,
         // but a clear local error saves a round-trip).
         if (project.branched_from) {
           throw new CLIError(
-            "This directory is currently switched to a branch. Run `insforge branch switch --parent` first, then create a new branch from the parent.",
+            "This directory is currently switched to a branch. Run `yarah branch switch --parent` first, then create a new branch from the parent.",
           );
         }
         if (opts.mode !== 'full' && opts.mode !== 'schema-only') {
@@ -122,7 +122,7 @@ export function registerBranchCreateCommand(branch: Command): void {
         } catch (err) {
           if (provisioned) {
             spinner?.stop(
-              `Branch '${name}' is ready, but switching context failed — run \`insforge branch switch ${name}\` to retry`,
+              `Branch '${name}' is ready, but switching context failed — run \`yarah branch switch ${name}\` to retry`,
               1,
             );
           } else {
@@ -139,16 +139,16 @@ export function registerBranchCreateCommand(branch: Command): void {
         } else if (ready.branch_state === 'ready' && serving) {
           if (opts.switch) {
             outputInfo(
-              '⚠ Re-source your dev server env (.env) to pick up the new INSFORGE_URL / ANON_KEY.',
+              '⚠ Re-source your dev server env (.env) to pick up the new YARAH_URL / ANON_KEY.',
             );
           }
         } else if (ready.branch_state === 'ready') {
           outputInfo(
-            `Branch '${name}' exists but its host is not serving yet. Run \`insforge branch list\` to check, or \`insforge branch delete ${name}\` to remove it.`,
+            `Branch '${name}' exists but its host is not serving yet. Run \`yarah branch list\` to check, or \`yarah branch delete ${name}\` to remove it.`,
           );
         } else {
           outputInfo(
-            `Branch '${name}' is still in '${ready.branch_state}' state. Run \`insforge branch list\` to check.`,
+            `Branch '${name}' is still in '${ready.branch_state}' state. Run \`yarah branch list\` to check.`,
           );
         }
 
@@ -209,7 +209,7 @@ export function registerBranchCreateCommand(branch: Command): void {
  * coincidence (same name AND same mode AND the same ~60s AND our transport
  * failure). The real fix is a server-issued idempotency/request token on
  * `createBranchApi`; until that exists, this is the tightest client-side guard.
- * Reported upstream: InsForge/InsForge#1790.
+ * Reported upstream: Darts7u7/Yarah-oos#1790.
  */
 function isTransportFailure(err: unknown): boolean {
   return err instanceof CLIError && err.code === NETWORK_ERROR_CODE;

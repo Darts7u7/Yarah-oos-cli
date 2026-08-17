@@ -6,8 +6,8 @@ import { CLIError } from './errors.js';
 /**
  * Resolve the organization to operate on, in priority order:
  *   1. explicit --org-id flag
- *   2. INSFORGE_ORG_ID env var
- *   3. the linked project's org_id (.insforge/project.json)
+ *   2. YARAH_ORG_ID env var
+ *   3. the linked project's org_id (.yarah/project.json)
  *   4. the configured default_org_id
  *   5. auto-select if the account has exactly one org
  *   6. interactive prompt (TTY, non-JSON) — otherwise error
@@ -22,7 +22,7 @@ export async function resolveOrgId(
 ): Promise<string> {
   let orgId =
     flagOrgId ??
-    process.env.INSFORGE_ORG_ID ??
+    process.env.YARAH_ORG_ID ??
     getProjectConfig()?.org_id ??
     getGlobalConfig().default_org_id;
 
@@ -30,7 +30,7 @@ export async function resolveOrgId(
 
   const orgs = await listOrganizations(apiUrl);
   if (orgs.length === 0) {
-    throw new CLIError('No organizations found. Create one with `insforge orgs create`.');
+    throw new CLIError('No organizations found. Create one with `yarah orgs create`.');
   }
   if (orgs.length === 1) return orgs[0].id;
 

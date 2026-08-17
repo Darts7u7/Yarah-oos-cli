@@ -1,14 +1,14 @@
 # What the CLI changes about the upstream compose file. Everything else is
 # upstream's, unmodified.
 services:
-  insforge:
+  yarah:
     # Telemetry reads this as an artifact stamp: each way of shipping the stack
     # says what it is, so `local start` can be told apart from a self-hosted
     # docker compose. The upstream file does not reference the variable, and
     # Compose only passes variables a file names — so an env file cannot carry
     # it, and an overlay is the way to add it.
     environment:
-      INSFORGE_DEPLOYMENT_METHOD: cli-local
+      YARAH_DEPLOYMENT_METHOD: cli-local
 
     # Upstream publishes the API and dashboard on every interface, which is what
     # a self-hosted install wants. A development backend on a laptop that joins

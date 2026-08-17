@@ -1,7 +1,7 @@
 import type {
   PaymentEnvironment,
   RazorpayPlanPeriod,
-} from "@insforge/shared-schemas";
+} from "@yarahdev/shared-schemas";
 import { getProjectConfig } from "../../lib/config.js";
 import { CLIError } from "../../lib/errors.js";
 import { shutdownAnalytics, trackPayments } from "../../lib/analytics.js";

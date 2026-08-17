@@ -26,7 +26,7 @@ import {
 //      launches the machine pointing at the freshly-pushed image.
 //      Requires `flyctl` on PATH (no Docker daemon needed).
 //      The deploy token is scoped to one app + builder/wg, with `else: deny`
-//      — it cannot deploy or read anything else in the InsForge Fly org.
+//      — it cannot deploy or read anything else in the Yarah Fly org.
 export function registerComputeDeployCommand(computeCmd: Command): void {
   computeCmd
     .command('deploy [dir]')
@@ -195,7 +195,7 @@ export function registerComputeDeployCommand(computeCmd: Command): void {
           throw new CLIError(
             `No Dockerfile at ${dockerfilePath}.\n` +
               `  Either:\n` +
-              `   • Create one (ask your AI agent — see the insforge-cli skill)\n` +
+              `   • Create one (ask your AI agent — see the yarah-cli skill)\n` +
               `   • Use --image <url> to deploy a pre-built image instead`
           );
         }
@@ -278,7 +278,7 @@ export function registerComputeDeployCommand(computeCmd: Command): void {
               if (!json) {
                 outputInfo(
                   `Build failed and rollback also failed. ` +
-                    `Run: npx @insforge/cli compute delete ${serviceId}`
+                    `Run: npx @yarahdev/cli compute delete ${serviceId}`
                 );
               }
             }

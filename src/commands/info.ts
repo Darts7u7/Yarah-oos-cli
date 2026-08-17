@@ -32,7 +32,7 @@ export function registerContextCommand(program: Command): void {
           return;
         }
 
-        console.log('\n  InsForge CLI Context\n');
+        console.log('\n  Yarah CLI Context\n');
 
         // Auth status
         if (creds) {
@@ -56,7 +56,7 @@ export function registerContextCommand(program: Command): void {
           console.log(`  Region:        ${projectConfig.region}`);
           console.log(`  OSS Host:      ${projectConfig.oss_host}`);
         } else {
-          console.log('\n  Project:       (not linked — run `npx @insforge/cli link`)');
+          console.log('\n  Project:       (not linked — run `npx @yarahdev/cli link`)');
         }
 
         console.log('');

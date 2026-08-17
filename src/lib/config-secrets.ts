@@ -1,6 +1,6 @@
 // CLI/src/lib/config-secrets.ts
 //
-// Sensitive-field validation for insforge.toml.
+// Sensitive-field validation for yarah.toml.
 //
 // Sensitive fields (OAuth client_secret, SMTP password, S3 secret key, etc.)
 // MUST be `env(NAME)` references in the TOML — never literal values. This is
@@ -9,7 +9,7 @@
 // makes the file unconditionally safe to commit to git.
 //
 // The actual secret VALUES live in the project's secrets store
-// (`insforge secrets add NAME <value>`). The server resolves env() refs at
+// (`yarah secrets add NAME <value>`). The server resolves env() refs at
 // apply time and fails loudly if the named secret is missing.
 //
 // This module is registered in config-schema.ts when sensitive fields are
@@ -37,7 +37,7 @@ export function parseEnvRef(value: string): string | null {
 /**
  * Validate a sensitive string field. Returns the env() reference unchanged
  * if it's well-formed; otherwise throws ConfigValidationError with an
- * actionable error message that names the exact `insforge secrets add`
+ * actionable error message that names the exact `yarah secrets add`
  * command the user should run.
  *
  * @param path  The dotted path of the field (e.g. "email.smtp.password"),
@@ -66,15 +66,15 @@ export function validateSensitiveString(
     path,
     `sensitive field must be an env() reference; got literal value.\n` +
       `  fix:\n` +
-      `    1. insforge secrets add ${suggestedSecretName} "<value>"\n` +
-      `    2. update insforge.toml:\n` +
+      `    1. yarah secrets add ${suggestedSecretName} "<value>"\n` +
+      `    2. update yarah.toml:\n` +
       `         ${path.split('.').pop()} = "env(${suggestedSecretName})"\n` +
-      `    3. insforge config apply`,
+      `    3. yarah config apply`,
   );
 }
 
 /**
- * Resolve an env() ref against the project's InsForge secrets store. Returns
+ * Resolve an env() ref against the project's Yarah secrets store. Returns
  * the decrypted value. Pre-flight check before `apply` PUTs anything — if
  * the named secret doesn't exist or is inactive, fail fast with an
  * actionable error rather than letting the backend emit a generic 400.
@@ -109,7 +109,7 @@ export async function resolveEnvRef(envRef: string, fieldPath: string): Promise<
     if (/not found/i.test(message)) {
       throw new CLIError(
         `${fieldPath} references env(${secretName}) but no such secret exists.\n` +
-          `  fix: insforge secrets add ${secretName} "<value>"`,
+          `  fix: yarah secrets add ${secretName} "<value>"`,
         1,
         'SECRET_NOT_FOUND',
       );
@@ -135,7 +135,7 @@ export async function resolveEnvRef(envRef: string, fieldPath: string): Promise<
   if (typeof body.value !== 'string' || body.value.length === 0) {
     throw new CLIError(
       `env(${secretName}) resolved to an empty value (secret may be inactive).\n` +
-        `  fix: insforge secrets update ${secretName} --active true`,
+        `  fix: yarah secrets update ${secretName} --active true`,
       1,
       'SECRET_EMPTY',
     );

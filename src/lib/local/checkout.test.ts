@@ -49,16 +49,16 @@ function seedCheckout(cwd: string, env = 'ACCESS_API_KEY=ik_seeded\n'): void {
 /** A fake setup.sh that writes the same set, so ensureCheckout sees a real run. */
 function fakeSetupScript(): string {
   return (
-    '#!/bin/sh\n# INSFORGE_NO_GIT\nset -e\ncd "$1"\n' +
+    '#!/bin/sh\n# YARAH_NO_GIT\nset -e\ncd "$1"\n' +
     CHECKOUT_FILES.map((f) => `mkdir -p "$(dirname ${f})" && echo seeded > ${f}`).join('\n') +
     '\n[ -f .env ] || echo "ACCESS_API_KEY=ik_generated" > .env\n'
   );
 }
 
 describe('paths', () => {
-  it('puts the checkout inside .insforge, not beside it', () => {
+  it('puts the checkout inside .yarah, not beside it', () => {
     const cwd = tmp();
-    expect(checkoutDir(cwd).startsWith(join(cwd, '.insforge'))).toBe(true);
+    expect(checkoutDir(cwd).startsWith(join(cwd, '.yarah'))).toBe(true);
   });
 
   it('points at the compose file where upstream keeps it', () => {
@@ -137,7 +137,7 @@ describe('ensureCheckout', () => {
       'fetch',
       vi.fn(async () => ({ ok: true, status: 200, statusText: 'OK', text: async () => '<html>login</html>' })),
     );
-    await expect(ensureCheckout(cwd)).rejects.toThrow(/INSFORGE_NO_GIT/);
+    await expect(ensureCheckout(cwd)).rejects.toThrow(/YARAH_NO_GIT/);
   });
 
   it('runs the fetched script and reports its failure', async () => {
@@ -149,13 +149,13 @@ describe('ensureCheckout', () => {
         status: 200,
         statusText: 'OK',
         // Mentions the flag so the content check passes, then fails.
-        text: async () => '#!/bin/sh\n# INSFORGE_NO_GIT\necho boom >&2\nexit 3\n',
+        text: async () => '#!/bin/sh\n# YARAH_NO_GIT\necho boom >&2\nexit 3\n',
       })),
     );
     await expect(ensureCheckout(cwd)).rejects.toThrow(/boom/);
   });
 
-  it('runs the script with INSFORGE_NO_GIT so git is never required', async () => {
+  it('runs the script with YARAH_NO_GIT so git is never required', async () => {
     const cwd = tmp();
     const marker = join(cwd, 'saw-no-git');
     vi.stubGlobal(
@@ -165,7 +165,7 @@ describe('ensureCheckout', () => {
         status: 200,
         statusText: 'OK',
           text: async () =>
-            `#!/bin/sh\n[ -n "$INSFORGE_NO_GIT" ] && echo yes > ${marker}\n` +
+            `#!/bin/sh\n[ -n "$YARAH_NO_GIT" ] && echo yes > ${marker}\n` +
             fakeSetupScript(),
       })),
     );
@@ -220,7 +220,7 @@ describe('secrets are not regenerated over existing data', () => {
         ok: true,
         status: 200,
         statusText: 'OK',
-        text: async () => '#!/bin/sh\n# INSFORGE_NO_GIT\nexit 0\n',
+        text: async () => '#!/bin/sh\n# YARAH_NO_GIT\nexit 0\n',
       })),
     );
     await ensureCheckout(cwd, onExisting);

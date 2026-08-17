@@ -23,7 +23,7 @@ export function registerProjectsCommands(projectsCmd: Command): void {
           // Try to auto-select if user has only one org
           const orgs = await listOrganizations(apiUrl);
           if (orgs.length === 0) {
-            throw new CLIError('No organizations found. Create one on the InsForge dashboard.');
+            throw new CLIError('No organizations found. Create one on the Yarah dashboard.');
           }
           if (orgs.length === 1) {
             orgId = orgs[0].id;

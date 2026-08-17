@@ -1,7 +1,7 @@
 /**
  * Port allocation for a local instance.
  *
- * The defaults match every existing InsForge doc (7130 for the API and
+ * The defaults match every existing Yarah doc (7130 for the API and
  * dashboard, 5432 for Postgres, …), so the first instance on a machine keeps the
  * URLs a user has already seen. A second one cannot have them, and refusing to
  * start would make "one instance per directory" true only for the first
@@ -37,7 +37,7 @@ export function bindable(port: number, host: string): Promise<boolean> {
  *
  * Checking only loopback misses the collisions that matter most here. Docker
  * publishes on 0.0.0.0, and on macOS a container holding 0.0.0.0:5432 still
- * leaves a Node bind to 127.0.0.1:5432 succeeding — so a second InsForge
+ * leaves a Node bind to 127.0.0.1:5432 succeeding — so a second Yarah
  * instance passed this check and then died in `docker compose up` with "port is
  * already allocated". Checking only the wildcard would miss a service bound to
  * loopback alone, which a container publish would also collide with.
@@ -94,8 +94,8 @@ export async function ensurePortsAvailable(
   const flags = taken.map((c) => `--port-${c.name} <n>`).join(' ');
   throw new CLIError(
     `Port${taken.length > 1 ? 's' : ''} already in use:\n${detail}\n\n` +
-      'Another InsForge instance or an unrelated service is bound there. Either\n' +
-      `stop it, or pick different ports: insforge local start ${flags}`,
+      'Another Yarah instance or an unrelated service is bound there. Either\n' +
+      `stop it, or pick different ports: yarah local start ${flags}`,
   );
 }
 
@@ -177,7 +177,7 @@ export async function allocatePorts(
         `Port${stuck.length > 1 ? 's' : ''} already in use:\n${detail}\n\n` +
           'These were set explicitly, or belong to this directory\'s existing\n' +
           'instance, so they were not relocated. Free them, or pick others:\n' +
-          `  insforge local start ${flags}`,
+          `  yarah local start ${flags}`,
       );
     }
   }

@@ -98,7 +98,7 @@ function resolveStorage(opts: StartOptions, previous: StorageBackend | undefined
 function backupCloudLink(): string | null {
   const existing = getProjectConfig();
   if (!existing || existing.project_id === FAKE_PROJECT_ID) return null;
-  const target = join(process.cwd(), '.insforge', 'project.cloud.json');
+  const target = join(process.cwd(), '.yarah', 'project.cloud.json');
   if (!existsSync(target)) {
     copyFileSync(getProjectConfigFile(), target);
   }
@@ -124,7 +124,7 @@ async function waitForHealth(
       throw new CLIError(
         `The backend did not become healthy within ${Math.round(HEALTH_TIMEOUT_MS / 1000)}s.\n` +
           `Inspect the containers with:\n` +
-          `  docker ${composeArgs(ctx, ['logs', 'insforge']).map(shellQuote).join(' ')}`,
+          `  docker ${composeArgs(ctx, ['logs', 'yarah']).map(shellQuote).join(' ')}`,
       );
     }
     onTick(Date.now() - started);
@@ -135,7 +135,7 @@ async function waitForHealth(
 export function registerLocalStartCommand(localCmd: Command): void {
   localCmd
     .command('start')
-    .description('Start a local InsForge backend in Docker and link this directory')
+    .description('Start a local Yarah backend in Docker and link this directory')
     .option('--storage <backend>', `Object storage backend: ${STORAGE_BACKENDS.join(', ')}`)
     .option('--pull', 'Re-pull images even when they are already present locally')
     .option('--port-app <n>', 'Host port for the API and dashboard (default 7130)')
@@ -151,7 +151,7 @@ export function registerLocalStartCommand(localCmd: Command): void {
         const memory = dockerMemoryMb();
         if (memory !== null && memory < MIN_DOCKER_MEMORY_MB && !json) {
           clack.log.warn(
-            `Docker has ${memory} MB available. InsForge needs about ${MIN_DOCKER_MEMORY_MB} MB for four ` +
+            `Docker has ${memory} MB available. Yarah needs about ${MIN_DOCKER_MEMORY_MB} MB for four ` +
               'containers — raise it in Docker Desktop → Settings → Resources if startup fails.',
           );
         }
@@ -170,13 +170,13 @@ export function registerLocalStartCommand(localCmd: Command): void {
         const projectName = previous?.projectName ?? composeProjectName();
         const ctx: ComposeContext = { projectName, storage };
 
-        // The stack is defined in InsForge's repository, not here: this fetches
+        // The stack is defined in Yarah's repository, not here: this fetches
         // its setup.sh and runs it, which lands the compose file, the files it
         // mounts, and an .env holding the secrets it generates. Re-run on every
         // start so a release that adds a file is picked up; it leaves an existing
         // .env alone, so nothing rotates under a running instance.
         const fetchSpinner = json ? null : clack.spinner();
-        fetchSpinner?.start('Fetching the InsForge stack...');
+        fetchSpinner?.start('Fetching the Yarah stack...');
         await ensureCheckout(undefined, () => projectVolumes(projectName), storage);
         fetchSpinner?.stop('Stack ready');
 
@@ -202,7 +202,7 @@ export function registerLocalStartCommand(localCmd: Command): void {
         if (!secrets) {
           throw new CLIError(
             "The stack's env file is missing the keys setup.sh generates.\n" +
-              'Delete .insforge/checkout/.env and start again — note that this loses\n' +
+              'Delete .yarah/checkout/.env and start again — note that this loses\n' +
               'the credentials of any instance already running in this directory.',
           );
         }
@@ -260,15 +260,15 @@ export function registerLocalStartCommand(localCmd: Command): void {
         };
         saveProjectConfig(projectConfig);
 
-        // NEXT_PUBLIC_* matches what `insforge create` seeds; VITE_* is added
+        // NEXT_PUBLIC_* matches what `yarah create` seeds; VITE_* is added
         // because a Vite app cannot read NEXT_PUBLIC_ variables and local
         // development is overwhelmingly Vite. upsertEnvFile never overwrites an
         // existing value, so a user's own pins survive.
         const envResult = upsertEnvFile(join(process.cwd(), '.env.local'), {
-          NEXT_PUBLIC_INSFORGE_URL: baseUrl,
-          NEXT_PUBLIC_INSFORGE_ANON_KEY: secrets.anonKey,
-          VITE_INSFORGE_URL: baseUrl,
-          VITE_INSFORGE_ANON_KEY: secrets.anonKey,
+          NEXT_PUBLIC_YARAH_URL: baseUrl,
+          NEXT_PUBLIC_YARAH_ANON_KEY: secrets.anonKey,
+          VITE_YARAH_URL: baseUrl,
+          VITE_YARAH_ANON_KEY: secrets.anonKey,
         });
 
         await trackCommandUsage('local', 'start', true, { storage });
@@ -307,13 +307,13 @@ export function registerLocalStartCommand(localCmd: Command): void {
             `${pc.dim('Storage     ')} ${storage === 'local' ? 'local filesystem' : `${storage} (S3 gateway enabled)`}`,
             `${pc.dim('Version     ')} ${health.version ?? 'latest published'}`,
           ].join('\n'),
-          'Local InsForge is running',
+          'Local Yarah is running',
         );
 
         if (displacedCloudProject) {
           clack.log.warn(
             `This directory was linked to cloud project "${displacedCloudProject}". ` +
-              'Saved to .insforge/project.cloud.json — `insforge local stop --unlink` restores it.',
+              'Saved to .yarah/project.cloud.json — `yarah local stop --unlink` restores it.',
           );
         }
         if (envResult.mismatched.length > 0) {
@@ -325,8 +325,8 @@ export function registerLocalStartCommand(localCmd: Command): void {
 
         clack.log.info(
           `Linked this directory. Every other command now targets the local backend:\n` +
-            `  insforge db query "select 1"     insforge functions deploy\n` +
-            `  insforge local status            insforge local stop`,
+            `  yarah db query "select 1"     yarah functions deploy\n` +
+            `  yarah local status            yarah local stop`,
         );
       } catch (err) {
         await trackCommandUsage('local', 'start', false, {}, err);

@@ -6,7 +6,7 @@ import { registerLocalStatusCommand } from './status.js';
 export function registerLocalCommands(program: Command): void {
   const localCmd = program
     .command('local')
-    .description('Run InsForge on your own machine in Docker (one instance per directory)');
+    .description('Run Yarah on your own machine in Docker (one instance per directory)');
 
   registerLocalStartCommand(localCmd);
   registerLocalStopCommand(localCmd);

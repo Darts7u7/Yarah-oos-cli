@@ -3,7 +3,7 @@ import {
   getRazorpayPaymentsStatus,
   getStripePaymentsStatus,
 } from "../../lib/api/payments.js";
-import type { PaymentProvider } from "@insforge/shared-schemas";
+import type { PaymentProvider } from "@yarahdev/shared-schemas";
 import { requireAuth } from "../../lib/credentials.js";
 import { getRootOpts, handleError } from "../../lib/errors.js";
 import { outputJson, outputTable } from "../../lib/output.js";

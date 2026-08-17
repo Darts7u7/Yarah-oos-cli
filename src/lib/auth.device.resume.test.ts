@@ -26,7 +26,7 @@ let config: typeof ConfigModule;
 const PLATFORM = 'https://api.example.dev';
 
 beforeAll(async () => {
-  mocks.home = mkdtempSync(join(tmpdir(), 'insforge-device-resume-'));
+  mocks.home = mkdtempSync(join(tmpdir(), 'yarah-device-resume-'));
   auth = await import('./auth.js');
   config = await import('./config.js');
 });
@@ -84,7 +84,7 @@ const oauthError = (error: string) =>
 const pendingFixture = (overrides: Partial<PendingDeviceLogin> = {}) => ({
   device_code: 'dvc_previous',
   user_code: 'BCDF-GHJK',
-  verification_uri_complete: 'https://insforge.dev/auth/device?user_code=BCDF-GHJK',
+  verification_uri_complete: 'https://yarah.dev/auth/device?user_code=BCDF-GHJK',
   interval: 0.01,
   expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
   platform_url: PLATFORM,
@@ -101,8 +101,8 @@ describe('performDeviceLogin pending-state lifecycle', () => {
           JSON.stringify({
             device_code: 'dvc_fresh',
             user_code: 'MNPQ-RSTV',
-            verification_uri: 'https://insforge.dev/auth/device',
-            verification_uri_complete: 'https://insforge.dev/auth/device?user_code=MNPQ-RSTV',
+            verification_uri: 'https://yarah.dev/auth/device',
+            verification_uri_complete: 'https://yarah.dev/auth/device?user_code=MNPQ-RSTV',
             expires_in: 900,
             interval: 0.01,
           }),
@@ -153,8 +153,8 @@ describe('performDeviceLogin pending-state lifecycle', () => {
           JSON.stringify({
             device_code: 'dvc_fresh2',
             user_code: 'WXZB-CDFG',
-            verification_uri: 'https://insforge.dev/auth/device',
-            verification_uri_complete: 'https://insforge.dev/auth/device?user_code=WXZB-CDFG',
+            verification_uri: 'https://yarah.dev/auth/device',
+            verification_uri_complete: 'https://yarah.dev/auth/device?user_code=WXZB-CDFG',
             expires_in: 900,
             interval: 0.01,
           }),

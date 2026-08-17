@@ -23,6 +23,6 @@ describe('cli-overlay.yml', () => {
   });
 
   it('stamps the deployment method so telemetry can tell local starts apart', () => {
-    expect(overlay).toMatch(/INSFORGE_DEPLOYMENT_METHOD:\s*cli-local/);
+    expect(overlay).toMatch(/YARAH_DEPLOYMENT_METHOD:\s*cli-local/);
   });
 });

@@ -1,8 +1,8 @@
 /**
  * Scrub likely PII and credentials from free text before it leaves the
- * machine (e.g. `insforge feedback` payloads).
+ * machine (e.g. `yarah feedback` payloads).
  *
- * Deliberately conservative: over-redacting a value the InsForge team could
+ * Deliberately conservative: over-redacting a value the Yarah team could
  * have used is fine; shipping someone's email, token, or username off the
  * device is not. The platform re-scrubs server-side — this is the first line
  * of defense, not the only one. IPv6 and phone numbers are intentionally not
@@ -17,7 +17,7 @@ const REDACTIONS: Array<[RegExp, string]> = [
   [/\beyJ[\w-]{4,}\.[\w-]{4,}\.[\w-]*/g, '[REDACTED_JWT]'],
   // Authorization header values
   [/\b[Bb]earer\s+[\w.~+/=-]{8,}/g, 'Bearer [REDACTED]'],
-  // Known key formats: InsForge uak_, Stripe sk_/pk_/rk_(live|test)/whsec_,
+  // Known key formats: Yarah uak_, Stripe sk_/pk_/rk_(live|test)/whsec_,
   // OpenAI/Anthropic-style sk-, GitHub gh*_/github_pat_, AWS AKIA, Slack xox*-
   [/\b(?:uak|whsec|(?:sk|pk|rk)_(?:live|test))_[\w-]{8,}/g, '[REDACTED_KEY]'],
   [/\bsk-[\w-]{16,}/g, '[REDACTED_KEY]'],

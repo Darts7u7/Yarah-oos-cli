@@ -2,7 +2,7 @@ import type { DiffChange, DiffResult } from './config-diff.js';
 
 export function formatPlan(result: DiffResult): string {
   if (result.changes.length === 0) {
-    return 'No changes. Live state matches insforge.toml.';
+    return 'No changes. Live state matches yarah.toml.';
   }
 
   const bySection = new Map<string, DiffChange[]>();

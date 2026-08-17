@@ -19,7 +19,7 @@ export interface AuditEntry {
   decision: Decision;
 }
 
-const AUDIT_DIR = join(homedir(), '.insforge');
+const AUDIT_DIR = join(homedir(), '.yarah');
 const AUDIT_FILE = join(AUDIT_DIR, 'guard-audit.jsonl');
 
 /** Best-effort audit write — never throws into the command path. */

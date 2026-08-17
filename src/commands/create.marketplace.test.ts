@@ -25,7 +25,7 @@ describe('reportMarketplaceDownload', () => {
     await reportMarketplaceDownload('chatbot');
 
     const [url, init] = fetchMock.mock.calls[0];
-    expect(url).toBe('https://p8n7m7ci.us-east.insforge.app/functions/report-download');
+    expect(url).toBe('https://p8n7m7ci.us-east.apps.yarah.dev/functions/report-download');
     expect(init).toMatchObject({
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

@@ -1,6 +1,6 @@
-# Developing the InsForge CLI
+# Developing the Yarah CLI
 
-Notes for anyone (human or agent) making changes to the `@insforge/cli` repo.
+Notes for anyone (human or agent) making changes to the `@yarahdev/cli` repo.
 Read this before touching source files.
 
 ## 1. Follow the existing patterns
@@ -59,22 +59,22 @@ truth for product telemetry — do not add alternative analytics systems.
 path has been removed from `create`, `link`, and `docs`. PostHog is the path
 going forward.
 
-## 3. Keep InsForge agent skills in sync
+## 3. Keep Yarah agent skills in sync
 
 The CLI auto-installs agent skills via `installSkills()` in
 `src/lib/skills.ts`. Those skills live in a separate repo
-(`InsForge/agent-skills`) and teach AI coding agents how to use the InsForge
+(`Yarah/agent-skills`) and teach AI coding agents how to use the Yarah
 SDK and CLI.
 
 When you add, rename, or change the behavior of a user-facing CLI command,
-you almost certainly need to update the `insforge-cli` skill in the
+you almost certainly need to update the `yarah-cli` skill in the
 `agent-skills` repo as well — otherwise the skill will be stale and agents
 will generate wrong commands.
 
 Checklist when changing a command:
 
-- [ ] Does the `insforge-cli` skill document this command? If yes, open a PR
-      in `InsForge/agent-skills` to update it in the same change set.
+- [ ] Does the `yarah-cli` skill document this command? If yes, open a PR
+      in `Yarah/agent-skills` to update it in the same change set.
 - [ ] Did flags, defaults, or output shape change? Update the skill examples.
 - [ ] Did a command get renamed or removed? Remove or rename in the skill.
 - [ ] Did you add a new command? Decide whether agents should know about it
@@ -106,7 +106,7 @@ npm pack --dry-run
 
 Releases are fully automated via GitHub Actions
 ([`.github/workflows/publish.yml`](.github/workflows/publish.yml)).
-The CLI is published to npm as `@insforge/cli` whenever a GitHub Release is
+The CLI is published to npm as `@yarahdev/cli` whenever a GitHub Release is
 published.
 
 **Steps to ship a release:**
@@ -129,8 +129,8 @@ published.
      injected from repo secrets.
    - Runs `npm publish --access public` with `NPM_TOKEN` from repo secrets.
 6. **Verify** the new version appears on
-   [npmjs.com/package/@insforge/cli](https://www.npmjs.com/package/@insforge/cli)
-   and that `npx @insforge/cli@latest --version` returns the expected version.
+   [npmjs.com/package/@yarahdev/cli](https://www.npmjs.com/package/@yarahdev/cli)
+   and that `npx @yarahdev/cli@latest --version` returns the expected version.
 
 **Do not** publish manually from a local machine — that bypasses the CI build
 (and therefore the PostHog key injection) and leads to analytics being
@@ -142,21 +142,21 @@ that version.
 
 ## 6. Feedback backend
 
-The `insforge feedback` command submits reports to a dedicated InsForge
+The `yarah feedback` command submits reports to a dedicated Yarah
 project via a public edge function — no login required, spam contained
 server-side (RLS-locked table, allow-list validation, per-IP rate limit,
 duplicate folding). The endpoint URL and anon key are deliberately
 hardcoded in `src/lib/api/feedback.ts` (public client credentials
 protected by RLS + function-side rate limiting), overridable via
-`INSFORGE_FEEDBACK_URL` / `INSFORGE_FEEDBACK_ANON_KEY` for testing and
+`YARAH_FEEDBACK_URL` / `YARAH_FEEDBACK_ANON_KEY` for testing and
 rotation.
 
 The backend itself (the `feedback` table, the `submit-feedback` edge
 function, and its secrets) lives in the feedback project — it is not
 versioned in this repo. To inspect or maintain it, link a scratch
 directory to that project with the admin key, then use
-`insforge functions code submit-feedback`, `db query`, and
+`yarah functions code submit-feedback`, `db query`, and
 `functions deploy` as usual; the project's agent memory
-(`insforge memory list`) records the design decisions and triage
+(`yarah memory list`) records the design decisions and triage
 workflow. If you change the CLI's feedback payload shape, update the
 function's allow-list and the table schema in the same change set.

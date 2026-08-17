@@ -29,9 +29,9 @@ describe('requireAuth — OSS bypass for self-hosted links', () => {
   });
 
   function writeProjectJson(projectId: string, orgId: string): void {
-    mkdirSync(join(dir, '.insforge'), { recursive: true });
+    mkdirSync(join(dir, '.yarah'), { recursive: true });
     writeFileSync(
-      join(dir, '.insforge', 'project.json'),
+      join(dir, '.yarah', 'project.json'),
       JSON.stringify({
         project_id: projectId,
         project_name: 'oss-project',
@@ -55,6 +55,6 @@ describe('requireAuth — OSS bypass for self-hosted links', () => {
     writeProjectJson(projectId, orgId);
     const creds = await requireAuth();
     expect(creds.access_token).toBe('oss-token');
-    expect(creds.user.email).toBe('oss@insforge.local');
+    expect(creds.user.email).toBe('oss@yarah.local');
   });
 });

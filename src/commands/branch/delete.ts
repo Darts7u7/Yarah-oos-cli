@@ -17,7 +17,7 @@ export function registerBranchDeleteCommand(branch: Command): void {
       try {
         await requireAuth(apiUrl);
         const project = getProjectConfig();
-        if (!project) throw new CLIError('No project linked. Run `insforge link` first.');
+        if (!project) throw new CLIError('No project linked. Run `yarah link` first.');
 
         const parentId = project.branched_from?.project_id ?? project.project_id;
         const branches = await listBranchesApi(parentId, apiUrl);
@@ -49,7 +49,7 @@ export function registerBranchDeleteCommand(branch: Command): void {
           } catch (err) {
             // Non-fatal: the branch is gone, but we can at least tell the user.
             outputInfo(
-              `Switched-to-parent failed (${(err as Error).message}). Run \`insforge branch switch --parent\` manually.`,
+              `Switched-to-parent failed (${(err as Error).message}). Run \`yarah branch switch --parent\` manually.`,
             );
           }
         }

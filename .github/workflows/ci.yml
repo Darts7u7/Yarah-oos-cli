@@ -36,9 +36,9 @@ jobs:
           server_port: ${{ secrets.MAIL_SMTP_PORT }}
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          subject: "[insforge-cli] CI failed on PR #${{ github.event.pull_request.number }}"
+          subject: "[yarah-cli] CI failed on PR #${{ github.event.pull_request.number }}"
           to: ${{ secrets.OWNER_EMAIL }}
-          from: ${{ secrets.MAIL_FROM || 'ci@insforge.dev' }}
+          from: ${{ secrets.MAIL_FROM || 'ci@yarah.dev' }}
           body: |
             CI check failed for PR #${{ github.event.pull_request.number }}
             Title: ${{ env.PR_TITLE }}

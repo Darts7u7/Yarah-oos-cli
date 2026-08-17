@@ -24,8 +24,8 @@ import { getProjectConfig } from '../../lib/config.js';
 export function registerConfigPlanCommand(cfg: Command): void {
   cfg
     .command('plan')
-    .description('Show diff between insforge.toml and live project state')
-    .option('--file <path>', 'path to insforge.toml', 'insforge.toml')
+    .description('Show diff between yarah.toml and live project state')
+    .option('--file <path>', 'path to yarah.toml', 'yarah.toml')
     .action(async (opts, cmd) => {
       const { json } = getRootOpts(cmd);
       let projectConfig: ReturnType<typeof getProjectConfig> = null;
@@ -69,7 +69,7 @@ export function registerConfigPlanCommand(cfg: Command): void {
         if (json) {
           console.log(JSON.stringify({ ...result, skipped }, null, 2));
         } else {
-          console.log(`Plan for insforge.toml (file: ${opts.file}):\n`);
+          console.log(`Plan for yarah.toml (file: ${opts.file}):\n`);
           console.log(formatPlan(result));
           if (skipped.length) {
             console.warn(

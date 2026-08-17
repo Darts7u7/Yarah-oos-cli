@@ -23,7 +23,7 @@ export function registerBranchResetCommand(branch: Command): void {
       try {
         await requireAuth(apiUrl);
         const project = getProjectConfig();
-        if (!project) throw new CLIError('No project linked. Run `insforge link` first.');
+        if (!project) throw new CLIError('No project linked. Run `yarah link` first.');
 
         // Resolve branch by name. parent_id flips depending on whether the
         // directory is currently switched onto a branch.
@@ -72,7 +72,7 @@ export function registerBranchResetCommand(branch: Command): void {
           outputInfo('⚠ Reminder: edge functions, website, and compute aren’t touched by reset; redeploy if needed.');
         } else {
           outputInfo(
-            `Branch '${name}' is still in '${final.branch_state}' state. Run \`insforge branch list\` to check.`,
+            `Branch '${name}' is still in '${final.branch_state}' state. Run \`yarah branch list\` to check.`,
           );
         }
       } catch (err) {

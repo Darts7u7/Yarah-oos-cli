@@ -9,7 +9,7 @@ import {
 import type {
   PaymentEnvironment,
   PaymentProvider,
-} from "@insforge/shared-schemas";
+} from "@yarahdev/shared-schemas";
 import { requireAuth } from "../../lib/credentials.js";
 import { CLIError, getRootOpts, handleError } from "../../lib/errors.js";
 import { outputJson, outputSuccess } from "../../lib/output.js";

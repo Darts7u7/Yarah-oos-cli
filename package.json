@@ -1,10 +1,10 @@
 {
-  "name": "@insforge/cli",
+  "name": "@yarahdev/cli",
   "version": "0.2.7",
-  "description": "InsForge CLI - Command line tool for InsForge platform",
+  "description": "Yarah CLI - Command line tool for Yarah platform",
   "type": "module",
   "bin": {
-    "insforge": "dist/index.js"
+    "yarah": "dist/index.js"
   },
   "main": "./dist/index.js",
   "scripts": {
@@ -18,7 +18,7 @@
     "test:integration:real": "npm run build && vitest run src/integration/real-project.test.ts"
   },
   "keywords": [
-    "insforge",
+    "yarah",
     "cli",
     "backend",
     "database",
@@ -37,7 +37,7 @@
   ],
   "dependencies": {
     "@clack/prompts": "^0.9.1",
-    "@insforge/shared-schemas": "^1.1.58",
+    "@yarahdev/shared-schemas": "^1.2.1",
     "archiver": "^7.0.1",
     "cli-table3": "^0.6.5",
     "commander": "^13.1.0",

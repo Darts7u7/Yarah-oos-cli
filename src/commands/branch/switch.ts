@@ -34,7 +34,7 @@ export async function runBranchSwitch(input: RunBranchSwitchOptions): Promise<vo
   await requireAuth(input.apiUrl);
   const current = getProjectConfig();
   if (!current) {
-    throw new CLIError('No project linked. Run `insforge link` first.');
+    throw new CLIError('No project linked. Run `yarah link` first.');
   }
 
   if (input.toParent && input.name) {
@@ -47,7 +47,7 @@ export async function runBranchSwitch(input: RunBranchSwitchOptions): Promise<vo
   if (input.toParent) {
     if (!existsSync(parentBackup)) {
       throw new CLIError(
-        'No parent backup found. Re-link the directory with `insforge link --project-id <parent>`.',
+        'No parent backup found. Re-link the directory with `yarah link --project-id <parent>`.',
       );
     }
     copyFileSync(parentBackup, projectFile);

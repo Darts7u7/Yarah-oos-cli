@@ -7,7 +7,7 @@ import { registerConfigApplyCommand } from './apply.js';
 export function registerConfigCommand(program: Command): void {
   const cfg = program
     .command('config')
-    .description('Manage insforge.toml (declarative project configuration)');
+    .description('Manage yarah.toml (declarative project configuration)');
   registerConfigExportCommand(cfg);
   registerConfigPlanCommand(cfg);
   registerConfigApplyCommand(cfg);

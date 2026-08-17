@@ -168,11 +168,11 @@ describe('orgs leave / delete', () => {
       appkey: 'k',
       region: 'us-east',
       api_key: 'key',
-      oss_host: 'https://k.us-east.insforge.app',
+      oss_host: 'https://k.us-east.apps.yarah.dev',
     });
     const logs = await runWithCapturedLog(makeProgram(), [
       'orgs', 'delete', '--org-id', 'org-1', '--yes',
     ]);
-    expect(logs.join('\n')).toContain('insforge link');
+    expect(logs.join('\n')).toContain('yarah link');
   });
 });

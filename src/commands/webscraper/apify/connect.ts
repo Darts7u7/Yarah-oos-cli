@@ -42,7 +42,7 @@ interface ConnectResult {
 export function registerApifyConnectCommand(program: Command): void {
   program
     .command('connect')
-    .description('Connect your Apify account to your InsForge project')
+    .description('Connect your Apify account to your Yarah project')
     .option('--skip-browser', 'Do not auto-open the browser for OAuth; only print the URL')
     .option('--token <token>', 'Apify API token (self-hosted; skips the OAuth flow)')
     .action(async (opts, cmd) => {
@@ -79,7 +79,7 @@ interface RunConnectOpts {
   token?: string;
 }
 
-// Ensures the InsForge project has an Apify connection (cli-start / OAuth).
+// Ensures the Yarah project has an Apify connection (cli-start / OAuth).
 // This populates the connection in cloud-backend and makes the in-product
 // data-source integration usable. Unlike PostHog there is no SDK-install
 // wizard step — the command ends once connected.
@@ -120,14 +120,14 @@ async function runConnect(opts: RunConnectOpts): Promise<ConnectResult> {
   // 2. Login token
   const token = getAccessToken();
   if (!token) {
-    throw new AuthError('Not logged in. Run `insforge login` first.');
+    throw new AuthError('Not logged in. Run `yarah login` first.');
   }
 
   trackGroupCommand('apify', 'connect', proj);
 
   if (!opts.json) {
     clack.intro('Apify connect');
-    outputSuccess(`Linked to InsForge project: ${proj.project_name} (${proj.project_id})`);
+    outputSuccess(`Linked to Yarah project: ${proj.project_name} (${proj.project_id})`);
   }
 
   // 3. Ensure connection exists
@@ -144,7 +144,7 @@ async function runConnect(opts: RunConnectOpts): Promise<ConnectResult> {
     const { skillsInstalled } = await runApifyAuthBridge(opts.json);
     if (!opts.json && !skillsInstalled) {
       clack.log.warn(
-        'Agent skills did not install. Re-run `insforge webscraper apify login`, or install manually with `npx skills add apify/agent-skills`.',
+        'Agent skills did not install. Re-run `yarah webscraper apify login`, or install manually with `npx skills add apify/agent-skills`.',
       );
     }
   } catch (err) {
@@ -152,9 +152,9 @@ async function runConnect(opts: RunConnectOpts): Promise<ConnectResult> {
       // The bridge's malformed-token error carries its own remediation
       // (re-run `connect`); preserve it instead of the generic login hint.
       clack.log.warn(
-        err instanceof Error && err.message.includes('`insforge webscraper apify connect`')
+        err instanceof Error && err.message.includes('`yarah webscraper apify connect`')
           ? err.message
-          : 'Connected, but auto-login/skills install failed. Run `insforge webscraper apify login` to finish.',
+          : 'Connected, but auto-login/skills install failed. Run `yarah webscraper apify login` to finish.',
       );
     }
   }
@@ -169,8 +169,8 @@ async function runConnect(opts: RunConnectOpts): Promise<ConnectResult> {
       .join('\n');
     clack.outro(
       details
-        ? `Apify is connected to your InsForge project.\n\n${details}`
-        : 'Apify is connected to your InsForge project.',
+        ? `Apify is connected to your Yarah project.\n\n${details}`
+        : 'Apify is connected to your Yarah project.',
     );
   }
 
@@ -199,7 +199,7 @@ async function ensureConnection(
 
   if (startResult.type === 'connected') {
     if (!opts.json) {
-      outputSuccess('Apify is already connected to your InsForge project.');
+      outputSuccess('Apify is already connected to your Yarah project.');
     }
     // Sanity-check that cloud-backend has the connection row, surface a clear
     // error if cli-start says yes but /connection says no (data drift).
@@ -208,7 +208,7 @@ async function ensureConnection(
       throw new CLIError(`Forbidden: ${fetchResult.message}`, 5);
     }
     if (fetchResult.kind === 'unauthorized') {
-      throw new AuthError(`Not authenticated: ${fetchResult.message}. Re-run \`insforge login\`.`);
+      throw new AuthError(`Not authenticated: ${fetchResult.message}. Re-run \`yarah login\`.`);
     }
     if (fetchResult.kind === 'error') {
       throw new CLIError(`Could not verify the Apify connection: ${fetchResult.message}`);
@@ -237,7 +237,7 @@ async function runConnectFlow(
     process.stderr.write(`Authorize Apify: ${authorizeUrl}\n`);
     process.stderr.write('Your browser should open automatically. If not, copy the URL above.\n');
   } else {
-    clack.log.info('Apify is not yet connected to your InsForge project.');
+    clack.log.info('Apify is not yet connected to your Yarah project.');
     if (opts.skipBrowser) {
       clack.log.info(`Open this URL to authorize Apify:\n${pc.cyan(pc.underline(authorizeUrl))}`);
     } else {

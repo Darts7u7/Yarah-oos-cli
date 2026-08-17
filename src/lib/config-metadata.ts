@@ -3,13 +3,13 @@
 // Single source of truth for converting /api/metadata's raw JSON response
 // into the shapes the rest of the CLI consumes:
 //   - liveFromMetadata → LiveConfig for the diff layer (apply, plan)
-//   - configFromMetadata → InsforgeConfig + skipped[] for export
+//   - configFromMetadata → YarahConfig + skipped[] for export
 //
 // All field-presence detection lives here. apply / plan / export route
 // through these two functions so a future field-mapping fix lands in one
 // place rather than diverging across commands.
 
-import type { InsforgeConfig } from './config-schema.js';
+import type { YarahConfig } from './config-schema.js';
 import type { LiveConfig } from './config-diff.js';
 
 /**
@@ -191,8 +191,8 @@ function asRetentionDays(v: unknown): number | null | undefined {
 }
 
 /**
- * Project the raw metadata response onto an InsforgeConfig suitable for
- * writing back as `insforge.toml`. Mirrors liveFromMetadata's presence
+ * Project the raw metadata response onto an YarahConfig suitable for
+ * writing back as `yarah.toml`. Mirrors liveFromMetadata's presence
  * detection but emits the schema shape (optional everything) and tracks
  * sections the backend doesn't yet expose so export can warn the user.
  *
@@ -204,10 +204,10 @@ export function configFromMetadata(
   raw: RawMetadataResponse,
   endpointConfig: EndpointConfigResponses = {},
 ): {
-  config: InsforgeConfig;
+  config: YarahConfig;
   skipped: string[];
 } {
-  const config: InsforgeConfig = {};
+  const config: YarahConfig = {};
   const skipped: string[] = [];
   // Same defensive narrowing as liveFromMetadata — a non-object auth slice
   // means "this backend exposes nothing", not "crash on `in`".

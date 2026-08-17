@@ -2,7 +2,7 @@
 // already exist are left untouched (warned), package.json is deep-merged, and
 // .env.example is appended rather than replaced.
 //
-// Auth-provider scaffolds live in the InsForge templates repo under
+// Auth-provider scaffolds live in the Yarah templates repo under
 // `auth-providers/<provider>/` — they are NOT regular templates and never
 // appear in the CLI's `create` template picker. This function shallow-clones
 // the templates repo to a tempdir, reads `manifest.json` from the provider
@@ -182,7 +182,7 @@ async function walkFiles(dir: string, base = dir): Promise<string[]> {
 // user's project.
 const PROVIDER_META_FILES = new Set(['manifest.json', 'README.md']);
 
-// INSFORGE_TEMPLATES_REPO and INSFORGE_TEMPLATES_BRANCH are escape hatches for
+// YARAH_TEMPLATES_REPO and YARAH_TEMPLATES_BRANCH are escape hatches for
 // development against unmerged template branches. They are passed to git via
 // execFile's argv (no shell), but we still validate them so an env var can't
 // inject a `--upload-pack` or other git option that consumes the next argv.
@@ -192,18 +192,18 @@ const SAFE_BRANCH_PATTERN = /^[A-Za-z0-9._/-]+$/;
 // Shallow-clone the templates repo and return the path to
 // `auth-providers/<provider>/`.
 async function fetchProviderTree(provider: AuthProvider): Promise<{ dir: string; cleanup: () => Promise<void> }> {
-  const tempDir = path.join(tmpdir(), `insforge-auth-${provider}-${Date.now()}`);
+  const tempDir = path.join(tmpdir(), `yarah-auth-${provider}-${Date.now()}`);
   await fs.mkdir(tempDir, { recursive: true });
   const cleanup = () => fs.rm(tempDir, { recursive: true, force: true }).catch(() => undefined);
 
   try {
-    const repo = process.env.INSFORGE_TEMPLATES_REPO ?? 'https://github.com/InsForge/insforge-templates.git';
+    const repo = process.env.YARAH_TEMPLATES_REPO ?? 'https://github.com/Darts7u7/Yarah-oos-templates.git';
     if (!SAFE_REPO_PATTERN.test(repo)) {
-      throw new Error(`INSFORGE_TEMPLATES_REPO has unsupported characters: ${repo}`);
+      throw new Error(`YARAH_TEMPLATES_REPO has unsupported characters: ${repo}`);
     }
-    const branch = process.env.INSFORGE_TEMPLATES_BRANCH;
+    const branch = process.env.YARAH_TEMPLATES_BRANCH;
     if (branch !== undefined && !SAFE_BRANCH_PATTERN.test(branch)) {
-      throw new Error(`INSFORGE_TEMPLATES_BRANCH has unsupported characters: ${branch}`);
+      throw new Error(`YARAH_TEMPLATES_BRANCH has unsupported characters: ${branch}`);
     }
 
     const args = ['clone', '--depth', '1'];
@@ -279,7 +279,7 @@ export async function applyAuthProvider(
     // 1. Copy files. Auth-provider overlays REPLACE on collision — the user
     //    opted into `--auth <provider>` expressing intent that the provider's
     //    auth primitives win over whatever the base template ships. Without
-    //    this, base templates that pre-populate src/lib/insforge.ts (with a
+    //    this, base templates that pre-populate src/lib/yarah.ts (with a
     //    different export shape) silently shadow the overlay version and the
     //    overlay's pages crash at runtime. Track overwrites so we can warn.
     //    Walk the provider tree and exclude overlay-meta files
@@ -320,7 +320,7 @@ export async function applyAuthProvider(
     const envExamplePath = path.join(cwd, '.env.example');
     if (await pathExists(envExamplePath)) {
       const existing = await fs.readFile(envExamplePath, 'utf-8');
-      if (!existing.includes('# ─── Better Auth + InsForge bridge')) {
+      if (!existing.includes('# ─── Better Auth + Yarah bridge')) {
         const existingKeys = extractEnvKeys(existing);
         const { filtered, dropped } = filterCollidingEnvLines(manifest.envExampleAppend, existingKeys);
         result.envKeysSkipped = dropped;
@@ -333,7 +333,7 @@ export async function applyAuthProvider(
     }
 
     // 4. Write/extend .env.local with auto-filled values. Substitution rules:
-    //    INSFORGE_*_URL, INSFORGE_*_ANON_KEY, NEXT_PUBLIC_APP_URL, *_JWT_SECRET,
+    //    YARAH_*_URL, YARAH_*_ANON_KEY, NEXT_PUBLIC_APP_URL, *_JWT_SECRET,
     //    BETTER_AUTH_SECRET. If .env.local already exists we APPEND only the
     //    keys it doesn't already define — same base-wins rule as .env.example.
     const envLocalPath = path.join(cwd, '.env.local');
@@ -350,9 +350,9 @@ export async function applyAuthProvider(
       /^([A-Z][A-Z0-9_]*=)(.*)$/gm,
       (_, prefix: string, value: string) => {
         const key = prefix.slice(0, -1);
-        if (/INSFORGE.*(URL|BASE_URL)$/.test(key)) return `${prefix}${projectConfig.oss_host}`;
-        if (/INSFORGE.*ANON_KEY$/.test(key)) return `${prefix}${anonKey}`;
-        if (key === 'NEXT_PUBLIC_APP_URL') return `${prefix}https://${projectConfig.appkey}.insforge.site`;
+        if (/YARAH.*(URL|BASE_URL)$/.test(key)) return `${prefix}${projectConfig.oss_host}`;
+        if (/YARAH.*ANON_KEY$/.test(key)) return `${prefix}${anonKey}`;
+        if (key === 'NEXT_PUBLIC_APP_URL') return `${prefix}https://${projectConfig.appkey}.yarah.dev`;
         if (/JWT_SECRET$/.test(key)) return `${prefix}${jwtSecret ?? value}`;
         if (key === 'BETTER_AUTH_SECRET') return `${prefix}${randomBytes(32).toString('hex')}`;
         if (key === 'DATABASE_URL') return `${prefix}${databaseUrl ?? value}`;
@@ -390,7 +390,7 @@ export async function applyAuthProvider(
     }
 
     if (!jwtSecret && !json) {
-      clack.log.warn('Could not auto-fill JWT_SECRET — run `npx @insforge/cli secrets get JWT_SECRET` and paste it into .env.local.');
+      clack.log.warn('Could not auto-fill JWT_SECRET — run `npx @yarahdev/cli secrets get JWT_SECRET` and paste it into .env.local.');
     }
 
     if (result.envKeysSkipped.length > 0 && !json) {

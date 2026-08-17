@@ -190,13 +190,13 @@ export function buildDnsSetupRecords(domain: CustomDomain): DnsSetupRecord[] {
   return records;
 }
 
-async function getInsForgeCustomDomain(domain: string): Promise<CustomDomain | null> {
+async function getYarahCustomDomain(domain: string): Promise<CustomDomain | null> {
   const res = await ossFetch('/api/deployments/domains');
   const data = await res.json() as ListCustomDomainsResponse;
   return data.domains.find((entry) => normalizeDomain(entry.domain) === domain) ?? null;
 }
 
-async function attachInsForgeCustomDomain(domain: string): Promise<CustomDomain> {
+async function attachYarahCustomDomain(domain: string): Promise<CustomDomain> {
   try {
     const res = await ossFetch('/api/deployments/domains', {
       method: 'POST',
@@ -205,14 +205,14 @@ async function attachInsForgeCustomDomain(domain: string): Promise<CustomDomain>
     return await res.json() as CustomDomain;
   } catch (err) {
     if (err instanceof CLIError && err.code === 'DOMAIN_ALREADY_EXISTS') {
-      const existing = await getInsForgeCustomDomain(domain);
+      const existing = await getYarahCustomDomain(domain);
       if (existing) return existing;
     }
     throw err;
   }
 }
 
-async function verifyInsForgeCustomDomain(domain: string): Promise<CustomDomain> {
+async function verifyYarahCustomDomain(domain: string): Promise<CustomDomain> {
   const res = await ossFetch(`/api/deployments/domains/${encodeURIComponent(domain)}/verify`, {
     method: 'POST',
   });
@@ -234,7 +234,7 @@ async function syncCloudflareDns(domain: CustomDomain): Promise<DnsSetupRecord[]
   const records = buildDnsSetupRecords(domain);
   if (records.length === 0) {
     throw new CLIError(
-      'InsForge did not return DNS records for this domain yet. Run `domains status` and retry `domains dns sync` later.',
+      'Yarah did not return DNS records for this domain yet. Run `domains status` and retry `domains dns sync` later.',
       1,
       'DOMAIN_DNS_RECORDS_PENDING',
     );
@@ -334,7 +334,7 @@ function assertRegistrationSucceeded(workflow: CloudflareRegistrationWorkflow): 
   if (workflow.state !== 'succeeded') {
     const detail = workflow.error?.message ? ` ${workflow.error.message}` : '';
     throw new CLIError(
-      `Cloudflare registration is ${workflow.state}.${detail} Run \`npx @insforge/cli domains resume ${workflow.domain_name}\` after it succeeds.`,
+      `Cloudflare registration is ${workflow.state}.${detail} Run \`npx @yarahdev/cli domains resume ${workflow.domain_name}\` after it succeeds.`,
       1,
       'DOMAIN_REGISTRATION_NOT_READY',
     );
@@ -479,14 +479,14 @@ export function registerDomainsCommands(program: Command): void {
 
   domainsCmd
     .command('attach <domain>')
-    .description('Attach a domain to the linked InsForge deployment')
+    .description('Attach a domain to the linked Yarah deployment')
     .action(async (rawDomain: string, _opts, cmd) => {
       const { json, apiUrl } = getRootOpts(cmd);
       const domainName = normalizeDomain(rawDomain);
       const telemetry = { tld: getTld(domainName) };
       try {
         await requireAuth(apiUrl);
-        const domain = await attachInsForgeCustomDomain(domainName);
+        const domain = await attachYarahCustomDomain(domainName);
         await trackDomainUsage('attach', true, telemetry);
         printCustomDomain(domain, json);
       } catch (err) {
@@ -498,16 +498,16 @@ export function registerDomainsCommands(program: Command): void {
   const dnsCmd = domainsCmd.command('dns').description('Manage DNS records for attached domains');
   dnsCmd
     .command('sync <domain>')
-    .description('Write InsForge/Vercel DNS records to Cloudflare DNS')
+    .description('Write Yarah/Vercel DNS records to Cloudflare DNS')
     .action(async (rawDomain: string, _opts, cmd) => {
       const { json, apiUrl } = getRootOpts(cmd);
       const domain = normalizeDomain(rawDomain);
       const telemetry = { tld: getTld(domain) };
       try {
         await requireAuth(apiUrl);
-        const attached = await getInsForgeCustomDomain(domain);
+        const attached = await getYarahCustomDomain(domain);
         if (!attached) {
-          throw new CLIError(`Domain ${domain} is not attached to this InsForge project.`, 4, 'DOMAIN_NOT_FOUND');
+          throw new CLIError(`Domain ${domain} is not attached to this Yarah project.`, 4, 'DOMAIN_NOT_FOUND');
         }
         const records = await syncCloudflareDns(attached);
         await trackDomainUsage('dns_sync', true, {
@@ -523,14 +523,14 @@ export function registerDomainsCommands(program: Command): void {
 
   domainsCmd
     .command('verify <domain>')
-    .description('Verify an attached domain through InsForge')
+    .description('Verify an attached domain through Yarah')
     .action(async (rawDomain: string, _opts, cmd) => {
       const { json, apiUrl } = getRootOpts(cmd);
       const domainName = normalizeDomain(rawDomain);
       const telemetry = { tld: getTld(domainName) };
       try {
         await requireAuth(apiUrl);
-        const domain = await verifyInsForgeCustomDomain(domainName);
+        const domain = await verifyYarahCustomDomain(domainName);
         await trackDomainUsage('verify', true, telemetry);
         printCustomDomain(domain, json);
       } catch (err) {
@@ -541,7 +541,7 @@ export function registerDomainsCommands(program: Command): void {
 
   domainsCmd
     .command('status <domain>')
-    .description('Show InsForge domain status, optionally including Cloudflare registration status')
+    .description('Show Yarah domain status, optionally including Cloudflare registration status')
     .option('--cloudflare', 'Also fetch Cloudflare registration status')
     .action(async (rawDomain: string, opts: DomainCommandOptions, cmd) => {
       const { json, apiUrl } = getRootOpts(cmd);
@@ -552,7 +552,7 @@ export function registerDomainsCommands(program: Command): void {
       };
       try {
         await requireAuth(apiUrl);
-        const attached = await getInsForgeCustomDomain(domain);
+        const attached = await getYarahCustomDomain(domain);
         const registration = opts.cloudflare
           ? await getOptionalCloudflareRegistration(domain)
           : null;
@@ -563,7 +563,7 @@ export function registerDomainsCommands(program: Command): void {
         if (json) {
           outputJson({ domain: attached, registration });
         } else if (!attached) {
-          console.log(`Domain ${domain} is not attached to this InsForge project.`);
+          console.log(`Domain ${domain} is not attached to this Yarah project.`);
         } else {
           printCustomDomain(attached, false);
           if (registration) {
@@ -595,9 +595,9 @@ export function registerDomainsCommands(program: Command): void {
         await requireAuth(apiUrl);
         const workflow = await getCloudflareRegistrationStatus(domain);
         assertRegistrationSucceeded(workflow);
-        const attached = await attachInsForgeCustomDomain(domain);
+        const attached = await attachYarahCustomDomain(domain);
         const records = await syncCloudflareDns(attached);
-        const verified = await verifyInsForgeCustomDomain(domain);
+        const verified = await verifyYarahCustomDomain(domain);
         await trackDomainUsage('resume', true, {
           ...telemetry,
           registration_state: workflow.state,
@@ -619,7 +619,7 @@ export function registerDomainsCommands(program: Command): void {
 
   domainsCmd
     .command('buy-and-attach <domain>')
-    .description('Register a domain, attach it to InsForge, sync Cloudflare DNS, and verify')
+    .description('Register a domain, attach it to Yarah, sync Cloudflare DNS, and verify')
     .option('--confirm-domain <domain>', 'Required non-interactive purchase confirmation')
     .option('--confirm-price <amount>', 'Required non-interactive purchase confirmation')
     .option('--confirm-currency <currency>', 'Required non-interactive purchase confirmation')
@@ -640,9 +640,9 @@ export function registerDomainsCommands(program: Command): void {
         );
         assertRegistrationSucceeded(registration);
 
-        const attached = await attachInsForgeCustomDomain(domain);
+        const attached = await attachYarahCustomDomain(domain);
         const dnsRecords = await syncCloudflareDns(attached);
-        const verified = await verifyInsForgeCustomDomain(domain);
+        const verified = await verifyYarahCustomDomain(domain);
         await trackDomainUsage('buy_and_attach', true, {
           ...baseTelemetry,
           poll_seconds: pollSeconds,

@@ -40,7 +40,7 @@ export function registerAdvisorCommands(advisorCmd: Command): void {
           outputJson(result);
         } else {
           outputSuccess(
-            `Advisor scan started (${result.scanId}). View results with \`insforge diagnose advisor\`.`,
+            `Advisor scan started (${result.scanId}). View results with \`yarah diagnose advisor\`.`,
           );
         }
       } catch (err) {
@@ -125,7 +125,7 @@ export function registerAdvisorCommands(advisorCmd: Command): void {
         } else {
           const target = scope === 'instance' ? `"${ruleId}" on ${opts.object}` : `rule "${ruleId}"`;
           outputSuccess(
-            `Suppressed ${target} (${suppression.id}). Undo with \`insforge advisor unsuppress ${suppression.id}\`.`,
+            `Suppressed ${target} (${suppression.id}). Undo with \`yarah advisor unsuppress ${suppression.id}\`.`,
           );
         }
       } catch (err) {

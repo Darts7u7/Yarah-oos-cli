@@ -60,7 +60,7 @@ export async function runAiSetup(opts: RunAiSetupOptions): Promise<AiSetupResult
 
   if (!opts.json) {
     clack.intro('AI setup');
-    outputSuccess(`Linked to InsForge project: ${project.project_name} (${project.project_id})`);
+    outputSuccess(`Linked to Yarah project: ${project.project_name} (${project.project_id})`);
   }
 
   const spinner = !opts.json && isInteractive ? clack.spinner() : null;

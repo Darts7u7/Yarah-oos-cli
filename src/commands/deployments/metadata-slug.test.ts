@@ -29,7 +29,7 @@ const ossFetchMock = vi.fn(async (path: string, init?: RequestInit) => {
       JSON.stringify({
         success: true,
         slug: body.slug,
-        domain: body.slug ? `${body.slug}.insforge.app` : null,
+        domain: body.slug ? `${body.slug}.apps.yarah.dev` : null,
       }),
       {
         status: 200,
@@ -59,7 +59,7 @@ vi.mock('../../lib/config.js', () => ({
     appkey: 'app',
     region: 'us-east',
     api_key: 'key',
-    oss_host: 'https://app.us-east.insforge.app',
+    oss_host: 'https://app.us-east.apps.yarah.dev',
   })),
 }));
 

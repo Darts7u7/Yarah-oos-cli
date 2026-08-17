@@ -1,7 +1,7 @@
 # Human-in-the-loop guard (POC)
 
-Stops dangerous InsForge CLI operations for human approval **before** they run.
-It lives inside the `insforge` binary as a Commander `preAction` stage — not in
+Stops dangerous Yarah CLI operations for human approval **before** they run.
+It lives inside the `yarah` binary as a Commander `preAction` stage — not in
 any agent's harness — so it protects **every** caller automatically: Claude
 Code, Cursor, custom agents, scripts, CI, and humans. The caller's process
 blocks on a localhost approval page until a human clicks Approve or Deny.
@@ -27,13 +27,13 @@ instruction to re-run *with* `--reason` / `--impact` / `--recommendation`, and
 exits **2** (`needs_brief`). The agent reasons about the implications, re-runs
 with the brief, and *then* the human sees a readable approval page.
 
-A human at a TTY (or `INSFORGE_GUARD_REQUIRE_BRIEF=0`) skips the nudge and goes
+A human at a TTY (or `YARAH_GUARD_REQUIRE_BRIEF=0`) skips the nudge and goes
 straight to the page; if no brief was given, the page flags that clearly.
 
 ## Flow
 
 ```
-insforge --reason "<why>" <cmd>  →  parse  →  [preAction: guardHook]  →  action
+yarah --reason "<why>" <cmd>  →  parse  →  [preAction: guardHook]  →  action
                                                      │
                           assess() classifies the real operation (hard rules)
                                                      │
@@ -51,17 +51,17 @@ insforge --reason "<why>" <cmd>  →  parse  →  [preAction: guardHook]  →  a
 - `inspect.ts` — read-only **live introspection** of the linked project so the
   facts are about the *actual* target: real row count, size, and the real
   dependents (incoming foreign keys / dependent views / RLS policies) that will
-  break. Measured by InsForge via the same `runRawSql` path `db query` uses (the
+  break. Measured by Yarah via the same `runRawSql` path `db query` uses (the
   agent can't fake it). **Fail-open** with a 5s timeout: any error → generic rule
   text, and it never changes the verdict.
 - `brief.ts` — combines authoritative rule facts (tailored live when available)
   with the agent's structured brief (`--reason` / `--impact` / `--recommendation`).
   No LLM call.
 - `approval-server.ts` — single-use localhost HTTP server + browser open; serves
-  the card in two groups (rule facts + InsForge guidance · the agent's intent /
+  the card in two groups (rule facts + Yarah guidance · the agent's intent /
   implications / recommendation) and blocks until a click. **Fail-closed**: any
   error or 120s timeout → denied.
-- `audit.ts` — append-only `~/.insforge/guard-audit.jsonl` of every decision.
+- `audit.ts` — append-only `~/.yarah/guard-audit.jsonl` of every decision.
 - `index.ts` — the `guardHook` orchestrator (assess → nudge-if-no-brief → page),
   wired in `src/index.ts`.
 
@@ -75,11 +75,11 @@ insforge --reason "<why>" <cmd>  →  parse  →  [preAction: guardHook]  →  a
 
 ## How an agent passes its brief
 
-Instruct agents (via the InsForge skill / MCP) to attach a brief to destructive
+Instruct agents (via the Yarah skill / MCP) to attach a brief to destructive
 commands. The flags map directly to the page sections:
 
 ```bash
-insforge \
+yarah \
   --reason         "Dropping deprecated users table; app moved to accounts last week" \
   --impact         "14,200 rows destroyed; sessions.user_id FK breaks; irreversible without nightly backup" \
   --recommendation "Approve only if the accounts cutover is confirmed and tonight's backup exists" \
@@ -95,7 +95,7 @@ The static rules can't know every edge case. The calling agent — which has app
 context the rules don't — can flag an operation the rules consider safe:
 
 ```bash
-npx @insforge/cli --flag-destructive "this UPDATE rewrites every tenant's billing config" \
+npx @yarahdev/cli --flag-destructive "this UPDATE rewrites every tenant's billing config" \
   db query "UPDATE tenant_config SET plan = 'free'"
 ```
 
@@ -107,15 +107,15 @@ removes them. A buggy or prompt-injected agent therefore can't use it to bypass.
 ## Enabling the guard
 
 Off by default (shipping is a no-op). Turn it on **per project** when linking —
-the choice persists in `.insforge/project.json`:
+the choice persists in `.yarah/project.json`:
 
 ```bash
-npx @insforge/cli link --project-id <id> --org-id <id> --guard     # enable
-npx @insforge/cli link ... --guard off                             # disable
+npx @yarahdev/cli link --project-id <id> --org-id <id> --guard     # enable
+npx @yarahdev/cli link ... --guard off                             # disable
 ```
 
 Resolution order (source of truth, highest first):
-**`INSFORGE_GUARD` env → persisted `--guard` setting → default (off)**.
+**`YARAH_GUARD` env → persisted `--guard` setting → default (off)**.
 The env var is the override / kill switch; flip `GUARD_DEFAULT_ENABLED` in
 `enabled.ts` (or wire a remote flag) when the feature goes GA.
 
@@ -123,14 +123,14 @@ The env var is the override / kill switch; flip `GUARD_DEFAULT_ENABLED` in
 
 | Var | Effect |
 |-----|--------|
-| `INSFORGE_GUARD` | **Override / kill switch.** `1`/`true`/`on` enables, `0`/`false`/`off` disables — wins over the persisted project setting. |
-| `INSFORGE_GUARD_SUMMARY` | Agent intent (env fallback for `--reason`). |
-| `INSFORGE_GUARD_IMPACT` | Agent implications (env fallback for `--impact`). |
-| `INSFORGE_GUARD_RECOMMENDATION` | Agent recommendation (env fallback for `--recommendation`). |
-| `INSFORGE_GUARD_REQUIRE_BRIEF` | `1` = always require a brief; `0` = never (go straight to page). Default: require for non-interactive callers. |
-| `INSFORGE_GUARD_BYPASS=1` | Skip approval (audited as `bypassed`) — for opted-in automation. |
-| `INSFORGE_GUARD_OPEN=0` | Print the approval link only; don't auto-open a browser (headless). |
-| `INSFORGE_GUARD_TIMEOUT_MS` | Approval window in ms before fail-closed deny (default 120000). |
+| `YARAH_GUARD` | **Override / kill switch.** `1`/`true`/`on` enables, `0`/`false`/`off` disables — wins over the persisted project setting. |
+| `YARAH_GUARD_SUMMARY` | Agent intent (env fallback for `--reason`). |
+| `YARAH_GUARD_IMPACT` | Agent implications (env fallback for `--impact`). |
+| `YARAH_GUARD_RECOMMENDATION` | Agent recommendation (env fallback for `--recommendation`). |
+| `YARAH_GUARD_REQUIRE_BRIEF` | `1` = always require a brief; `0` = never (go straight to page). Default: require for non-interactive callers. |
+| `YARAH_GUARD_BYPASS=1` | Skip approval (audited as `bypassed`) — for opted-in automation. |
+| `YARAH_GUARD_OPEN=0` | Print the approval link only; don't auto-open a browser (headless). |
+| `YARAH_GUARD_TIMEOUT_MS` | Approval window in ms before fail-closed deny (default 120000). |
 
 ## Exit codes (when blocked)
 

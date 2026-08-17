@@ -11,7 +11,7 @@ import type {
   CreateRazorpayItemBody,
   ListRazorpayCatalogResponse,
   UpdateRazorpayItemBody,
-} from "@insforge/shared-schemas";
+} from "@yarahdev/shared-schemas";
 import {
   formatAmount,
   formatDate,

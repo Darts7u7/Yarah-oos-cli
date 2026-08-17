@@ -41,10 +41,10 @@ vi.mock('../../lib/credentials.js', () => ({
 }));
 
 vi.mock('../../lib/config.js', () => ({
-  buildOssHost: (appkey: string, region: string) => `https://${appkey}.${region}.insforge.app`,
+  buildOssHost: (appkey: string, region: string) => `https://${appkey}.${region}.apps.yarah.dev`,
   getProjectConfig: vi.fn(),
   saveProjectConfig: vi.fn(),
-  getLocalConfigDir: () => '/tmp/.insforge',
+  getLocalConfigDir: () => '/tmp/.yarah',
   FAKE_PROJECT_ID: '00000000-0000-0000-0000-000000000000',
 }));
 
@@ -173,7 +173,7 @@ describe('branch create', () => {
       appkey: 'p1ky',
       region: 'us-east',
       api_key: 'k',
-      oss_host: 'p1ky.us-east.insforge.app',
+      oss_host: 'p1ky.us-east.apps.yarah.dev',
     });
     const program = new Command().exitOverride();
     program.option('--json').option('--api-url <url>').option('-y, --yes');
@@ -211,7 +211,7 @@ describe('branch create', () => {
       appkey: 'p1ky',
       region: 'us-east',
       api_key: 'k',
-      oss_host: 'p1ky.us-east.insforge.app',
+      oss_host: 'p1ky.us-east.apps.yarah.dev',
     });
     const program = new Command().exitOverride();
     program.option('--json').option('--api-url <url>').option('-y, --yes');
@@ -248,7 +248,7 @@ describe('branch create', () => {
       appkey: 'p1ky',
       region: 'us-east',
       api_key: 'k',
-      oss_host: 'https://p1ky.us-east.insforge.app',
+      oss_host: 'https://p1ky.us-east.apps.yarah.dev',
     });
     const { runBranchSwitch } = await import('./switch.js');
     (runBranchSwitch as Mock).mockRejectedValueOnce(new Error('network down'));
@@ -278,7 +278,7 @@ describe('branch create', () => {
     expect(spinnerMock.stop).toHaveBeenCalledTimes(1);
     const [stopMsg, stopCode] = spinnerMock.stop.mock.calls[0];
     expect(stopMsg).toContain('switching context failed');
-    expect(stopMsg).toContain('insforge branch switch feat-x');
+    expect(stopMsg).toContain('yarah branch switch feat-x');
     expect(stopMsg).not.toContain('creation failed');
     expect(stopCode).toBe(1);
   });
@@ -292,7 +292,7 @@ describe('branch create', () => {
       appkey: 'p1ky',
       region: 'us-east',
       api_key: 'k',
-      oss_host: 'https://p1ky.us-east.insforge.app',
+      oss_host: 'https://p1ky.us-east.apps.yarah.dev',
     });
     const program = new Command().exitOverride();
     program.option('--json').option('--api-url <url>').option('-y, --yes');
@@ -329,7 +329,7 @@ describe('branch create', () => {
     (probeBackendHealth as Mock).mockResolvedValue({
       reachable: false,
       status: null,
-      detail: 'Connection to p1ky-x9p.us-east.insforge.app was reset.',
+      detail: 'Connection to p1ky-x9p.us-east.apps.yarah.dev was reset.',
     });
     vi.useFakeTimers();
     const program = new Command().exitOverride();
@@ -350,7 +350,7 @@ describe('branch create', () => {
     // The sibling of "ready but not serving": if the branch is stuck in a
     // non-terminal state past the poll budget it is equally unusable, so
     // automation reading the exit code must not see success. (Review suggestion,
-    // InsForge/CLI#201.)
+    // Darts7u7/Yarah-oos-cli#201.)
     const { getProjectConfig } = await import('../../lib/config.js');
     (getProjectConfig as Mock).mockReturnValue({
       project_id: 'p1',
@@ -405,7 +405,7 @@ describe('branch create', () => {
     });
     const { createBranchApi, listBranchesApi } = await import('../../lib/api/platform.js');
     (createBranchApi as Mock).mockRejectedValueOnce(
-      new CLIError('Connection to api.insforge.dev was reset.', 1, 'NETWORK_ERROR'),
+      new CLIError('Connection to api.yarah.dev was reset.', 1, 'NETWORK_ERROR'),
     );
     (listBranchesApi as Mock).mockResolvedValueOnce([
       {
@@ -435,7 +435,7 @@ describe('branch create', () => {
     // A collaborator's same-name branch landing in the skew window — at the same
     // moment our own request loses its response leg — must not be adopted, or a
     // default --switch would move local context onto their branch. Requiring a
-    // matching mode narrows that collision. (cubic P2, InsForge/CLI#201.)
+    // matching mode narrows that collision. (cubic P2, Darts7u7/Yarah-oos-cli#201.)
     const { getProjectConfig } = await import('../../lib/config.js');
     (getProjectConfig as Mock).mockReturnValue({
       project_id: 'p1',
@@ -444,7 +444,7 @@ describe('branch create', () => {
     });
     const { createBranchApi, listBranchesApi } = await import('../../lib/api/platform.js');
     (createBranchApi as Mock).mockRejectedValueOnce(
-      new CLIError('Connection to api.insforge.dev was reset.', 1, 'NETWORK_ERROR'),
+      new CLIError('Connection to api.yarah.dev was reset.', 1, 'NETWORK_ERROR'),
     );
     // Same name, freshly created (inside the window), but the WRONG mode.
     (listBranchesApi as Mock).mockResolvedValueOnce([
@@ -481,7 +481,7 @@ describe('branch create', () => {
     });
     const { createBranchApi, listBranchesApi } = await import('../../lib/api/platform.js');
     (createBranchApi as Mock).mockRejectedValueOnce(
-      new CLIError('Connection to api.insforge.dev was reset.', 1, 'NETWORK_ERROR'),
+      new CLIError('Connection to api.yarah.dev was reset.', 1, 'NETWORK_ERROR'),
     );
     (listBranchesApi as Mock).mockResolvedValueOnce([]);
     const program = new Command().exitOverride();
@@ -551,7 +551,7 @@ describe('branch create', () => {
     });
     const { createBranchApi, listBranchesApi } = await import('../../lib/api/platform.js');
     (createBranchApi as Mock).mockRejectedValueOnce(
-      new CLIError('Connection to api.insforge.dev was reset.', 1, 'NETWORK_ERROR'),
+      new CLIError('Connection to api.yarah.dev was reset.', 1, 'NETWORK_ERROR'),
     );
     (listBranchesApi as Mock).mockResolvedValueOnce([
       {

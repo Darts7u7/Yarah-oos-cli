@@ -54,7 +54,7 @@ describe('validateSensitiveString', () => {
     expect(caught).toBeInstanceOf(ConfigValidationError);
     expect(caught!.path).toBe('email.smtp.password');
     expect(caught!.message).toContain('sensitive field must be an env() reference');
-    expect(caught!.message).toContain('insforge secrets add SMTP_PASSWORD');
+    expect(caught!.message).toContain('yarah secrets add SMTP_PASSWORD');
     expect(caught!.message).toContain('password = "env(SMTP_PASSWORD)"');
   });
 
@@ -102,7 +102,7 @@ describe('resolveEnvRef', () => {
       resolveEnvRef('env(MISSING)', 'auth.smtp.password'),
     ).rejects.toMatchObject({
       code: 'SECRET_NOT_FOUND',
-      message: expect.stringContaining('insforge secrets add MISSING'),
+      message: expect.stringContaining('yarah secrets add MISSING'),
     });
   });
 
@@ -117,7 +117,7 @@ describe('resolveEnvRef', () => {
       resolveEnvRef('env(INACTIVE)', 'auth.smtp.password'),
     ).rejects.toMatchObject({
       code: 'SECRET_EMPTY',
-      message: expect.stringContaining('insforge secrets update INACTIVE --active true'),
+      message: expect.stringContaining('yarah secrets update INACTIVE --active true'),
     });
   });
 

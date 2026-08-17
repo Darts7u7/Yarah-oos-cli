@@ -4,7 +4,7 @@
  * dependents (foreign keys / views / RLS policies) that will break — instead of
  * generic boilerplate.
  *
- * Trust note: these facts are measured by InsForge against the project's own
+ * Trust note: these facts are measured by Yarah against the project's own
  * database (via the same `runRawSql` path `db query` uses), NOT supplied by the
  * agent. They enrich the authoritative side of the page.
  *

@@ -88,7 +88,7 @@ async function isApifyLoggedIn(token: string): Promise<boolean> {
  * Auth bridge shared by `webscraper apify connect` and `webscraper apify
  * login`:
  *
- * 1. fetch the InsForge-managed Apify access token,
+ * 1. fetch the Yarah-managed Apify access token,
  * 2. ensure the Apify CLI is installed (visible progress; no buffer ceiling),
  * 3. `apify login --token` (HARD REQ: never the browser OAuth flow),
  * 4. install Apify's official agent skills.
@@ -108,10 +108,10 @@ export async function runApifyAuthBridge(json: boolean): Promise<{ skillsInstall
   // the `.cmd` shims). Apify API tokens are `apify_api_<alphanumeric>`, so any
   // character outside this safe set means a corrupt/unexpected token — reject it
   // rather than let a shell metacharacter reach the command line (injection /
-  // broken arg parsing). The trusted source (InsForge) should never emit one.
+  // broken arg parsing). The trusted source (Yarah) should never emit one.
   if (!/^[A-Za-z0-9_-]+$/.test(token)) {
     throw new Error(
-      'Unexpected Apify token format; refusing to pass it to the shell. Re-run `insforge webscraper apify connect`.',
+      'Unexpected Apify token format; refusing to pass it to the shell. Re-run `yarah webscraper apify connect`.',
     );
   }
 
@@ -128,11 +128,11 @@ export async function runApifyAuthBridge(json: boolean): Promise<{ skillsInstall
     // fall through to verification
   }
   if (!(await isApifyLoggedIn(token))) {
-    throw new Error('Apify login did not take effect. Re-run `insforge webscraper apify login`.');
+    throw new Error('Apify login did not take effect. Re-run `yarah webscraper apify login`.');
   }
 
   process.env.APIFY_TOKEN = token;
-  // Only the Apify skill pack — do not reinstall the main InsForge skills.
+  // Only the Apify skill pack — do not reinstall the main Yarah skills.
   const skillsInstalled = await installProviderSkillPack(json, 'apify');
   return { skillsInstalled };
 }

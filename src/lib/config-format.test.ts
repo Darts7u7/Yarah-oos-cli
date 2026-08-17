@@ -27,6 +27,6 @@ describe('formatPlan', () => {
       changes: [],
       summary: { add: 0, modify: 0, remove: 0, kept: 0 },
     });
-    expect(out).toContain('No changes. Live state matches insforge.toml.');
+    expect(out).toContain('No changes. Live state matches yarah.toml.');
   });
 });

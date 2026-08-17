@@ -7,20 +7,20 @@ describe('guardEnabled — rollout switch', () => {
     expect(guardEnabled({})).toBe(false);
   });
 
-  it('turns on for truthy INSFORGE_GUARD values', () => {
+  it('turns on for truthy YARAH_GUARD values', () => {
     for (const v of ['1', 'true', 'on', 'yes', 'enabled', 'TRUE', ' On ']) {
-      expect(guardEnabled({ INSFORGE_GUARD: v })).toBe(true);
+      expect(guardEnabled({ YARAH_GUARD: v })).toBe(true);
     }
   });
 
-  it('forces off for falsy INSFORGE_GUARD values', () => {
+  it('forces off for falsy YARAH_GUARD values', () => {
     for (const v of ['0', 'false', 'off', 'no', 'disabled']) {
-      expect(guardEnabled({ INSFORGE_GUARD: v })).toBe(false);
+      expect(guardEnabled({ YARAH_GUARD: v })).toBe(false);
     }
   });
 
   it('falls back to the default for unrecognized values', () => {
-    expect(guardEnabled({ INSFORGE_GUARD: 'maybe' })).toBe(GUARD_DEFAULT_ENABLED);
+    expect(guardEnabled({ YARAH_GUARD: 'maybe' })).toBe(GUARD_DEFAULT_ENABLED);
   });
 
   it('uses the persisted project setting when the env is unset', () => {
@@ -30,7 +30,7 @@ describe('guardEnabled — rollout switch', () => {
   });
 
   it('lets the env override the persisted setting (kill switch / override)', () => {
-    expect(guardEnabled({ INSFORGE_GUARD: '0' }, true)).toBe(false);
-    expect(guardEnabled({ INSFORGE_GUARD: '1' }, false)).toBe(true);
+    expect(guardEnabled({ YARAH_GUARD: '0' }, true)).toBe(false);
+    expect(guardEnabled({ YARAH_GUARD: '1' }, false)).toBe(true);
   });
 });

@@ -1,8 +1,8 @@
-# `insforge diagnose` Implementation Plan
+# `yarah diagnose` Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add an `insforge diagnose` command group that aggregates backend health data (EC2 metrics, advisor scans, DB diagnostics, logs) into a unified CLI experience.
+**Goal:** Add an `yarah diagnose` command group that aggregates backend health data (EC2 metrics, advisor scans, DB diagnostics, logs) into a unified CLI experience.
 
 **Architecture:** Flat subcommand structure under `diagnose`, each file calling `platformFetch` or `ossFetch` directly. Comprehensive report (`diagnose` with no subcommand) orchestrates all sources via `Promise.allSettled`. Follows existing CLI command patterns exactly.
 
@@ -110,7 +110,7 @@ export function registerDiagnoseMetricsCommand(diagnoseCmd: Command): void {
         if (!config) throw new ProjectNotLinkedError();
         if (config.project_id === 'oss-project') {
           throw new CLIError(
-            'Metrics requires InsForge Platform login. Not available when linked via --api-key.',
+            'Metrics requires Yarah Platform login. Not available when linked via --api-key.',
           );
         }
 
@@ -249,7 +249,7 @@ export function registerDiagnoseAdvisorCommand(diagnoseCmd: Command): void {
         if (!config) throw new ProjectNotLinkedError();
         if (config.project_id === 'oss-project') {
           throw new CLIError(
-            'Advisor requires InsForge Platform login. Not available when linked via --api-key.',
+            'Advisor requires Yarah Platform login. Not available when linked via --api-key.',
           );
         }
 
@@ -560,7 +560,7 @@ import { handleError, getRootOpts } from '../../lib/errors.js';
 import { outputJson, outputTable } from '../../lib/output.js';
 import { reportCliUsage } from '../../lib/skills.js';
 
-const LOG_SOURCES = ['insforge.logs', 'postgREST.logs', 'postgres.logs', 'function.logs'] as const;
+const LOG_SOURCES = ['yarah.logs', 'postgREST.logs', 'postgres.logs', 'function.logs'] as const;
 
 const ERROR_PATTERN = /\b(error|fatal|panic)\b/i;
 
@@ -779,7 +779,7 @@ export function registerDiagnoseCommands(diagnoseCmd: Command): void {
           report.errors = errors;
           outputJson(report);
         } else {
-          console.log(`\n  InsForge Health Report — ${projectName}\n`);
+          console.log(`\n  Yarah Health Report — ${projectName}\n`);
 
           // Metrics section
           console.log(sectionHeader('System Metrics (last 1h)'));

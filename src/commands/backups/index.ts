@@ -23,10 +23,10 @@ import { captureEvent, shutdownAnalytics } from '../../lib/analytics.js';
 import type { Backup, OssBackup } from '../../types.js';
 
 function resolveProjectId(opts: { project?: string }): string {
-  // An explicit --project must beat INSFORGE_PROJECT_ID — it also picks the backend route.
+  // An explicit --project must beat YARAH_PROJECT_ID — it also picks the backend route.
   const id = opts.project ?? getProjectId();
   if (!id) {
-    throw new CLIError('No project specified. Pass --project <id> or run `insforge link` first.');
+    throw new CLIError('No project specified. Pass --project <id> or run `yarah link` first.');
   }
   return id;
 }
@@ -93,7 +93,7 @@ async function waitForOssBackup(backupId: string): Promise<OssBackup> {
     await new Promise((r) => setTimeout(r, OSS_WAIT_INTERVAL_MS));
   }
   throw new CLIError(
-    `Timed out waiting for backup ${backupId} to finish. Check it with \`insforge backups list\`.`,
+    `Timed out waiting for backup ${backupId} to finish. Check it with \`yarah backups list\`.`,
   );
 }
 
@@ -199,7 +199,7 @@ export function registerBackupsCommands(backupsCmd: Command): void {
           } else if (backup.status === 'completed') {
             outputSuccess(`Backup ${backup.id} completed (${formatBytes(backup.sizeBytes)}).`);
           } else {
-            outputSuccess(`Backup ${backup.id} started. Check progress with \`insforge backups list\`.`);
+            outputSuccess(`Backup ${backup.id} started. Check progress with \`yarah backups list\`.`);
           }
           return;
         }

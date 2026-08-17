@@ -12,11 +12,11 @@ export interface CliExecResult {
 }
 
 export function getOptionalApiUrl(): string | undefined {
-  return process.env.INSFORGE_API_URL?.trim() || undefined;
+  return process.env.YARAH_API_URL?.trim() || undefined;
 }
 
 export function getLogSource(): string {
-  return process.env.INTEGRATION_LOG_SOURCE?.trim() || 'insforge.logs';
+  return process.env.INTEGRATION_LOG_SOURCE?.trim() || 'yarah.logs';
 }
 
 export async function runCli(args: string[], opts?: { apiUrl?: string }): Promise<CliExecResult> {
@@ -28,7 +28,7 @@ export async function runCli(args: string[], opts?: { apiUrl?: string }): Promis
       cwd: process.cwd(),
       env: {
         ...process.env,
-        ...(opts?.apiUrl !== undefined ? { INSFORGE_API_URL: opts.apiUrl } : {}),
+        ...(opts?.apiUrl !== undefined ? { YARAH_API_URL: opts.apiUrl } : {}),
       },
       maxBuffer: 1024 * 1024,
     });

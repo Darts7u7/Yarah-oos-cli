@@ -1,8 +1,8 @@
-# `insforge diagnose` — SRE Diagnostic Command
+# `yarah diagnose` — SRE Diagnostic Command
 
 ## Overview
 
-Add a top-level `insforge diagnose` command group that aggregates backend health data from multiple sources (EC2 metrics, advisor scans, database diagnostics, logs) into a unified CLI experience. Helps developers quickly understand the state of their InsForge backend and troubleshoot issues.
+Add a top-level `yarah diagnose` command group that aggregates backend health data from multiple sources (EC2 metrics, advisor scans, database diagnostics, logs) into a unified CLI experience. Helps developers quickly understand the state of their Yarah backend and troubleshoot issues.
 
 ## Decisions
 
@@ -19,7 +19,7 @@ Add a top-level `insforge diagnose` command group that aggregates backend health
 
 ## Commands
 
-### `insforge diagnose`
+### `yarah diagnose`
 
 Comprehensive health report. Fetches all 4 data sources in parallel via `Promise.allSettled`. Unavailable modules render as N/A with reason.
 
@@ -31,7 +31,7 @@ Comprehensive health report. Fetches all 4 data sources in parallel via `Promise
 
 ```
 ┌─────────────────────────────────────────────────┐
-│  InsForge Health Report — {project_name}        │
+│  Yarah Health Report — {project_name}        │
 ├─────────────────────────────────────────────────┤
 │  System Metrics (last 1h)                       │
 │    CPU: 23.4%   Memory: 67.8%                   │
@@ -45,14 +45,14 @@ Comprehensive health report. Fetches all 4 data sources in parallel via `Promise
 │    Dead tuples: 2,060   Locks waiting: 0        │
 ├─────────────────────────────────────────────────┤
 │  Recent Errors (last 100 logs per source)       │
-│    insforge.logs: 0  postgREST.logs: 2          │
+│    yarah.logs: 0  postgREST.logs: 2          │
 │    postgres.logs: 0  function.logs: 1           │
 └─────────────────────────────────────────────────┘
 ```
 
 **JSON mode:** `{ metrics: {...} | null, advisor: {...} | null, db: {...} | null, logs: {...} | null, errors: ["EC2 monitoring not enabled"] }`
 
-### `insforge diagnose metrics`
+### `yarah diagnose metrics`
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -77,7 +77,7 @@ Latest = last data point. Avg/Max computed from `MetricSeries.data[]`. Network v
 
 **JSON mode:** API response augmented with computed `latest`, `avg`, `max` per metric.
 
-### `insforge diagnose advisor`
+### `yarah diagnose advisor`
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -103,7 +103,7 @@ Latest = last data point. Avg/Max computed from `MetricSeries.data[]`. Network v
 
 **JSON mode:** `{ scan: AdvisorScanSummary, issues: AdvisorIssue[] }`
 
-### `insforge diagnose db`
+### `yarah diagnose db`
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -127,14 +127,14 @@ Latest = last data point. Avg/Max computed from `MetricSeries.data[]`. Network v
 
 **JSON mode:** `{ connections: {...}, slow_queries: [...], bloat: [...], size: [...], index_usage: [...], locks: [...], cache_hit: {...} }`
 
-### `insforge diagnose logs`
+### `yarah diagnose logs`
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `--source` | string | all 4 sources | Log source name |
 | `--limit` | number | 100 | Entries per source |
 
-**Log sources:** `insforge.logs`, `postgREST.logs`, `postgres.logs`, `function.logs`
+**Log sources:** `yarah.logs`, `postgREST.logs`, `postgres.logs`, `function.logs`
 
 **API:** `GET /api/logs/{source}?limit={n}` for each source.
 

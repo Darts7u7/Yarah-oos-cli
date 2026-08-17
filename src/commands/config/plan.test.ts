@@ -79,7 +79,7 @@ beforeEach(() => {
   nextStorageConfigResponse = undefined;
   nextRealtimeConfigResponse = undefined;
   nextSchedulesConfigResponse = undefined;
-  tmp = mkdtempSync(join(tmpdir(), 'insforge-plan-test-'));
+  tmp = mkdtempSync(join(tmpdir(), 'yarah-plan-test-'));
 });
 
 describe('config plan (capability probe)', () => {
@@ -87,7 +87,7 @@ describe('config plan (capability probe)', () => {
     nextMetadataResponse = {
       auth: { allowedRedirectUrls: ['https://a.com'] },
     };
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(tomlPath, '[auth]\nallowed_redirect_urls = ["https://b.com"]\n');
 
     const program = makeProgram();
@@ -101,7 +101,7 @@ describe('config plan (capability probe)', () => {
 
   it('reports skipped paths when backend omits the field', async () => {
     nextMetadataResponse = { auth: { someOtherField: 'x' } };
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(tomlPath, '[auth]\nallowed_redirect_urls = ["https://b.com"]\n');
 
     const program = makeProgram();
@@ -118,7 +118,7 @@ describe('config plan (capability probe)', () => {
     nextStorageConfigResponse = new CLIError('NOT_FOUND', 1, 'NOT_FOUND', 404);
     nextRealtimeConfigResponse = new CLIError('OSS request failed: 404', 1, undefined, 404);
     nextSchedulesConfigResponse = new CLIError('NOT_FOUND', 1, 'NOT_FOUND', 404);
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(tomlPath, '[auth]\nallowed_redirect_urls = ["https://b.com"]\n');
 
     const program = makeProgram();
@@ -134,7 +134,7 @@ describe('config plan (capability probe)', () => {
   it('uses optional config endpoint support for storage changes', async () => {
     nextMetadataResponse = { auth: {} };
     nextStorageConfigResponse = { maxFileSizeMb: 50 };
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(tomlPath, '[storage]\nmax_file_size_mb = 100\n');
 
     const program = makeProgram();
@@ -150,7 +150,7 @@ describe('config plan (capability probe)', () => {
     nextMetadataResponse = { auth: {} };
     nextRealtimeConfigResponse = { retentionDays: 7 };
     nextSchedulesConfigResponse = { retentionDays: null };
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(
       tomlPath,
       '[realtime]\nretention_days = 14\n\n[schedules]\nretention_days = 30\n',
@@ -167,7 +167,7 @@ describe('config plan (capability probe)', () => {
 
   it('marks optional config changes skipped when the endpoint does not expose the key', async () => {
     nextMetadataResponse = { auth: {} };
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(tomlPath, '[storage]\nmax_file_size_mb = 100\n');
 
     const program = makeProgram();
@@ -182,7 +182,7 @@ describe('config plan (capability probe)', () => {
   it('marks optional config changes skipped when the endpoint is a route-level 404', async () => {
     nextMetadataResponse = { auth: {} };
     nextStorageConfigResponse = new CLIError('OSS request failed: 404', 1, undefined, 404);
-    const tomlPath = join(tmp, 'insforge.toml');
+    const tomlPath = join(tmp, 'yarah.toml');
     writeFileSync(tomlPath, '[storage]\nmax_file_size_mb = 100\n');
 
     const program = makeProgram();

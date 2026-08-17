@@ -32,13 +32,13 @@ export default defineConfig({
           mkdirSync(assetsDir, { recursive: true });
           copyFileSync('src/assets/forger.json', join(assetsDir, 'forger.json'));
 
-          // Compose files for `insforge local start`. They reference only
+          // Compose files for `yarah local start`. They reference only
           // published images and named volumes, so they run correctly from
           // inside the installed package.
           const localDir = join(assetsDir, 'local');
           mkdirSync(localDir, { recursive: true });
           for (const file of [
-              // The stack comes from InsForge's repository via its setup.sh. The
+              // The stack comes from Yarah's repository via its setup.sh. The
               // only compose the CLI ships is the overlay carrying the telemetry
               // stamp — see src/lib/local/checkout.ts.
               'cli-overlay.yml',

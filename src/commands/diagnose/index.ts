@@ -296,7 +296,7 @@ export function registerDiagnoseCommands(diagnoseCmd: Command): void {
         if (json) {
           outputJson({ project: projectName, ...data });
         } else {
-          console.log(`\n  InsForge Health Report — ${projectName}\n`);
+          console.log(`\n  Yarah Health Report — ${projectName}\n`);
 
           // Metrics section
           console.log(sectionHeader('System Metrics (last 1h)'));

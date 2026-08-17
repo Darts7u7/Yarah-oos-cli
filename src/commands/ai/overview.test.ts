@@ -5,7 +5,7 @@ import { registerAiOverviewCommand } from './overview.js';
 vi.mock('../../lib/api/ai.js', () => ({
   getAiOverview: vi.fn(async () => ({
     key: {
-      label: 'insforge-managed',
+      label: 'yarah-managed',
       limit: 100,
       limitRemaining: 87.66,
       usage: 12.34,

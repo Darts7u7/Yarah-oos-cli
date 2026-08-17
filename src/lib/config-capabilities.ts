@@ -2,7 +2,7 @@
 //
 // Capability detection by metadata-shape probing.
 //
-// InsForge backends evolve independently per project. A user's CLI is always
+// Yarah backends evolve independently per project. A user's CLI is always
 // the latest from npm; the project's backend may be on any prior release.
 // We need to know which TOML sections the connected backend actually supports
 // so apply/plan/export can degrade gracefully instead of silently dropping

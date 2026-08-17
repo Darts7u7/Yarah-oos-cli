@@ -7,7 +7,7 @@ import { buildOssHost, getProjectConfig, FAKE_PROJECT_ID, FAKE_ORG_ID } from './
 describe('buildOssHost', () => {
   it('always returns an https URL', () => {
     expect(buildOssHost('p1ky-x9p', 'us-east')).toBe(
-      'https://p1ky-x9p.us-east.insforge.app',
+      'https://p1ky-x9p.us-east.apps.yarah.dev',
     );
   });
 
@@ -17,7 +17,7 @@ describe('buildOssHost', () => {
   it('output is parseable as a URL', () => {
     const url = new URL(buildOssHost('app', 'eu-west'));
     expect(url.protocol).toBe('https:');
-    expect(url.host).toBe('app.eu-west.insforge.app');
+    expect(url.host).toBe('app.eu-west.apps.yarah.dev');
   });
 });
 
@@ -36,9 +36,9 @@ describe('getProjectConfig — legacy OSS sentinel ID healing', () => {
   });
 
   function writeProjectJson(projectId: string, orgId: string): void {
-    mkdirSync(join(dir, '.insforge'), { recursive: true });
+    mkdirSync(join(dir, '.yarah'), { recursive: true });
     writeFileSync(
-      join(dir, '.insforge', 'project.json'),
+      join(dir, '.yarah', 'project.json'),
       JSON.stringify({
         project_id: projectId,
         project_name: 'oss-project',

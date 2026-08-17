@@ -81,7 +81,7 @@ export async function platformFetch(
   };
 
   const fullUrl = `${baseUrl}${path}`;
-  if (process.env.INSFORGE_DEBUG) {
+  if (process.env.YARAH_DEBUG) {
     console.error(`[DEBUG] ${fetchOptions.method ?? 'GET'} ${fullUrl}`);
     // Redact the bearer credential. For direct-key sessions it is now the
     // long-lived, non-rotating uak_ (not a short-lived JWT), so never write it
@@ -388,20 +388,20 @@ export async function upgradeInstance(
 }
 
 /**
- * The current latest InsForge OSS version. Resolved by the platform from the
+ * The current latest Yarah OSS version. Resolved by the platform from the
  * default tag in the OSS docker-compose.yml. Public endpoint, but we reuse
  * platformFetch (the auth header is harmless) since callers are authenticated.
  */
-export async function getLatestInsforgeVersion(apiUrl?: string): Promise<string> {
-  const res = await platformFetch('/platform/insforge/latest-version', {}, apiUrl);
+export async function getLatestYarahVersion(apiUrl?: string): Promise<string> {
+  const res = await platformFetch('/platform/yarah/latest-version', {}, apiUrl);
   const data = await res.json() as LatestVersionResponse;
   return data.version;
 }
 
 /**
- * Update a project to a specific InsForge OSS version. The platform has no
+ * Update a project to a specific Yarah OSS version. The platform has no
  * dedicated "update version" route — restart with an explicit
- * `insforgeOssVersion` pins the tag in the instance `.env` and redeploys
+ * `yarahOssVersion` pins the tag in the instance `.env` and redeploys
  * (the `generateUpdateCommands` path). This mirrors the dashboard's
  * "update to latest" button, which always passes the resolved version
  * explicitly rather than relying on the unpinned-restart fallback.
@@ -411,11 +411,11 @@ export async function getLatestInsforgeVersion(apiUrl?: string): Promise<string>
  */
 export async function restartProjectVersion(
   projectId: string,
-  insforgeOssVersion: string,
+  yarahOssVersion: string,
   wait: boolean,
   apiUrl?: string,
 ): Promise<Project> {
-  const params = new URLSearchParams({ insforgeOssVersion });
+  const params = new URLSearchParams({ yarahOssVersion });
   if (wait) params.set('waitForCompletion', 'true');
   const res = await platformFetch(
     `/projects/v1/${projectId}/restart?${params.toString()}`,

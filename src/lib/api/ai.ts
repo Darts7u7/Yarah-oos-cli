@@ -52,7 +52,7 @@ export async function getOpenRouterApiKey(): Promise<OpenRouterKeyResponse> {
 
   if (apiKey.length === 0) {
     throw new CLIError(
-      'AI gateway returned no OpenRouter API key. Open the InsForge dashboard AI page and verify Model Gateway is configured.',
+      'AI gateway returned no OpenRouter API key. Open the Yarah dashboard AI page and verify Model Gateway is configured.',
     );
   }
 

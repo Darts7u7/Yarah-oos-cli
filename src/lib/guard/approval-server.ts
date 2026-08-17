@@ -17,10 +17,10 @@ import type { Brief } from './brief.js';
 
 export type ApprovalResult = 'approved' | 'denied' | 'timeout';
 
-// Approval window. Override with INSFORGE_GUARD_TIMEOUT_MS (e.g. a longer window
+// Approval window. Override with YARAH_GUARD_TIMEOUT_MS (e.g. a longer window
 // for a human who isn't watching the terminal). Defaults to 120s, fail-closed.
 const TIMEOUT_MS = (() => {
-  const v = parseInt(process.env.INSFORGE_GUARD_TIMEOUT_MS ?? '', 10);
+  const v = parseInt(process.env.YARAH_GUARD_TIMEOUT_MS ?? '', 10);
   return Number.isFinite(v) && v > 0 ? v : 120_000;
 })();
 
@@ -53,7 +53,7 @@ function renderPage(brief: Brief, token: string): string {
 
   return `<!doctype html><html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>InsForge — approval required</title>
+<title>Yarah — approval required</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700;800&display=swap');
   :root { color-scheme: dark; --mint: #6ee7b7; }
@@ -126,7 +126,7 @@ function renderPage(brief: Brief, token: string): string {
             <rect x="7" y="2.5" width="4" height="17.5" rx="1.6"/>
             <rect x="14" y="11" width="4" height="9" rx="1.6"/></g>
           </svg>
-          <span class="wm">InsForge</span>
+          <span class="wm">Yarah</span>
         </div>
         <span class="tag">${esc(sevLabel)}</span>
       </div>
@@ -219,8 +219,8 @@ export function requestApproval(brief: Brief): Promise<ApprovalResult> {
       // Always print the link so a human can approve even if no browser opened
       // (headless agents, remote sessions). This is the "works for all agents" path.
       process.stderr.write(`\n  🛑 Human approval required: ${link}\n\n`);
-      // INSFORGE_GUARD_OPEN=0 prints the link only (headless servers, no focus steal).
-      if (process.env.INSFORGE_GUARD_OPEN !== '0') {
+      // YARAH_GUARD_OPEN=0 prints the link only (headless servers, no focus steal).
+      if (process.env.YARAH_GUARD_OPEN !== '0') {
         open(link).catch(() => { /* link already printed above */ });
       }
     });

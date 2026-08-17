@@ -3,12 +3,12 @@
 import { validateSensitiveString } from './config-secrets.js';
 
 /**
- * The shape of insforge.toml after parsing. Sections cover declarative
+ * The shape of yarah.toml after parsing. Sections cover declarative
  * project settings ("dashboard knobs"). Each section maps to a single
  * backend admin endpoint and is gated independently by the capability
  * probe — adding a section here does NOT silently break old backends.
  */
-export interface InsforgeConfig {
+export interface YarahConfig {
   project_id?: string;
   auth?: AuthConfig;
   storage?: StorageConfig;
@@ -90,12 +90,12 @@ export class ConfigValidationError extends Error {
  * Validates a parsed TOML object against the schema. Throws
  * ConfigValidationError with the path of the first violation.
  */
-export function validateConfig(input: unknown): InsforgeConfig {
+export function validateConfig(input: unknown): YarahConfig {
   if (input === null || typeof input !== 'object' || Array.isArray(input)) {
     throw new ConfigValidationError('', 'must be an object');
   }
   const obj = input as Record<string, unknown>;
-  const out: InsforgeConfig = {};
+  const out: YarahConfig = {};
 
   if ('project_id' in obj) {
     if (typeof obj.project_id !== 'string') {

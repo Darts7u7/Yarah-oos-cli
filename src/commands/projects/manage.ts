@@ -8,7 +8,7 @@ import {
   restoreProject,
   upgradeInstance,
   restartProjectVersion,
-  getLatestInsforgeVersion,
+  getLatestYarahVersion,
 } from '../../lib/api/platform.js';
 import { CLIError, getRootOpts, handleError } from '../../lib/errors.js';
 import { requireAuth } from '../../lib/credentials.js';
@@ -18,7 +18,7 @@ import { captureEvent, shutdownAnalytics } from '../../lib/analytics.js';
 
 /**
  * Resolve which project a lifecycle command targets. An explicit `--project`
- * always wins over the INSFORGE_PROJECT_ID env var and the linked project.
+ * always wins over the YARAH_PROJECT_ID env var and the linked project.
  * When `requireExplicit` is set (destructive cross-project ops like delete),
  * only `--project` is accepted — env/linked fallbacks are refused so a stray
  * ambient value can't silently point a destructive op at the wrong project.
@@ -36,7 +36,7 @@ function resolveProjectId(opts: { project?: string }, requireExplicit = false): 
   // var (getProjectId resolves env → linked when called with no override).
   const id = opts.project ?? getProjectId();
   if (!id) {
-    throw new CLIError('No project specified. Pass --project <id> or run `insforge link` first.');
+    throw new CLIError('No project specified. Pass --project <id> or run `yarah link` first.');
   }
   return id;
 }
@@ -217,7 +217,7 @@ export function registerProjectManageCommands(projectsCmd: Command): void {
 
   projectsCmd
     .command('update-version')
-    .description('Update the project to the latest InsForge backend version (restarts the instance)')
+    .description('Update the project to the latest Yarah backend version (restarts the instance)')
     .option('--project <id>', 'Project ID (defaults to the linked project)')
     .option('--wait', 'Wait for the restart to finish instead of returning while it is queued')
     .action(async (opts, cmd) => {
@@ -230,7 +230,7 @@ export function registerProjectManageCommands(projectsCmd: Command): void {
         // dashboard uses. An unpinned restart is NOT a reliable "go to latest"
         // (it keeps whatever tag the instance .env already has), so we always
         // pass the resolved version.
-        const latest = await getLatestInsforgeVersion(apiUrl);
+        const latest = await getLatestYarahVersion(apiUrl);
         const project = await getProject(projectId, apiUrl).catch(() => null);
         const current = project?.service_version ?? null;
 
@@ -250,7 +250,7 @@ export function registerProjectManageCommands(projectsCmd: Command): void {
         if (!yes && !json) {
           const from = current ? `from ${current} ` : '';
           const confirmed = await clack.confirm({
-            message: `Update the project ${from}to the latest InsForge version (${latest})? There will be a brief downtime.`,
+            message: `Update the project ${from}to the latest Yarah version (${latest})? There will be a brief downtime.`,
           });
           if (clack.isCancel(confirmed) || !confirmed) {
             outputInfo('Cancelled.');

@@ -25,7 +25,7 @@ afterEach(() => {
 
 const STATE: LocalState = {
   version: 1,
-  projectName: 'insforge-app-abc12345',
+  projectName: 'yarah-app-abc12345',
   storage: 'local',
   ports: { app: 7130, auth: 7131, deno: 7133, postgres: 5432, postgrest: 5430 },
   createdAt: '2026-08-05T00:00:00.000Z',
@@ -44,7 +44,7 @@ describe('composeProjectName', () => {
 
   it('produces a docker-legal project name', () => {
     for (const dir of ['/tmp/My App!', '/tmp/___weird', '/tmp/9lives', '/']) {
-      expect(composeProjectName(dir)).toMatch(/^insforge-[a-z0-9][a-z0-9_-]*$/);
+      expect(composeProjectName(dir)).toMatch(/^yarah-[a-z0-9][a-z0-9_-]*$/);
     }
   });
 });
@@ -62,7 +62,7 @@ describe('local state file', () => {
 
   it('returns null on a corrupt file rather than throwing', () => {
     const cwd = tmp();
-    mkdirSync(join(cwd, '.insforge'), { recursive: true });
+    mkdirSync(join(cwd, '.yarah'), { recursive: true });
     writeFileSync(localStateFile(cwd), '{not json');
     expect(readLocalState(cwd)).toBeNull();
   });
@@ -70,10 +70,10 @@ describe('local state file', () => {
   it('clearLocalState removes the state file and leaves the checkout alone', () => {
     const cwd = tmp();
     writeLocalState(STATE, cwd);
-    // The secrets live in .insforge/checkout/.env now, and the checkout is
+    // The secrets live in .yarah/checkout/.env now, and the checkout is
     // whole directories of upstream's files — `local stop --delete-data`
     // removes containers and volumes, not the stack definition.
-    const checkoutMarker = join(cwd, '.insforge', 'checkout', '.env');
+    const checkoutMarker = join(cwd, '.yarah', 'checkout', '.env');
     mkdirSync(dirname(checkoutMarker), { recursive: true });
     writeFileSync(checkoutMarker, 'X=1\n');
     clearLocalState(cwd);
@@ -86,7 +86,7 @@ describe('ensureLocalGitignore', () => {
   it('ignores the secrets and state files', () => {
     const cwd = tmp();
     ensureLocalGitignore(cwd);
-    const body = readFileSync(join(cwd, '.insforge', '.gitignore'), 'utf-8');
+    const body = readFileSync(join(cwd, '.yarah', '.gitignore'), 'utf-8');
     // checkout/ is where the generated .env lives — the entry that actually
     // keeps the instance's secrets out of a commit.
     expect(body.split('\n')).toContain('checkout/');
@@ -95,11 +95,11 @@ describe('ensureLocalGitignore', () => {
 
   it('is idempotent and preserves existing entries', () => {
     const cwd = tmp();
-    mkdirSync(join(cwd, '.insforge'), { recursive: true });
-    writeFileSync(join(cwd, '.insforge', '.gitignore'), 'something-else\n');
+    mkdirSync(join(cwd, '.yarah'), { recursive: true });
+    writeFileSync(join(cwd, '.yarah', '.gitignore'), 'something-else\n');
     ensureLocalGitignore(cwd);
     ensureLocalGitignore(cwd);
-    const lines = readFileSync(join(cwd, '.insforge', '.gitignore'), 'utf-8')
+    const lines = readFileSync(join(cwd, '.yarah', '.gitignore'), 'utf-8')
       .split('\n')
       .filter(Boolean);
     expect(lines).toEqual([
@@ -115,7 +115,7 @@ describe('ensureLocalGitignore', () => {
   it('does not ignore project.json', () => {
     const cwd = tmp();
     ensureLocalGitignore(cwd);
-    const body = readFileSync(join(cwd, '.insforge', '.gitignore'), 'utf-8');
+    const body = readFileSync(join(cwd, '.yarah', '.gitignore'), 'utf-8');
     expect(body).not.toContain('project.json');
     expect(body).not.toMatch(/^\*$/m);
   });
@@ -125,8 +125,8 @@ describe('composeProjectName across platforms', () => {
   it('takes the last segment of a Windows path too', () => {
     // split('/') returns the whole string on Windows, so the project name became
     // the entire path flattened — d-users-me-work-app rather than app.
-    expect(composeProjectName('C:\\Users\\me\\work\\app')).toMatch(/^insforge-app-[0-9a-f]{8}$/);
-    expect(composeProjectName('/home/me/work/app')).toMatch(/^insforge-app-[0-9a-f]{8}$/);
+    expect(composeProjectName('C:\\Users\\me\\work\\app')).toMatch(/^yarah-app-[0-9a-f]{8}$/);
+    expect(composeProjectName('/home/me/work/app')).toMatch(/^yarah-app-[0-9a-f]{8}$/);
   });
 
   it('still separates two directories that share a basename', () => {
@@ -134,6 +134,6 @@ describe('composeProjectName across platforms', () => {
   });
 
   it('falls back when there is no usable segment', () => {
-    expect(composeProjectName('/')).toMatch(/^insforge-(app|insforge)-[0-9a-f]{8}$/);
+    expect(composeProjectName('/')).toMatch(/^yarah-(app|yarah)-[0-9a-f]{8}$/);
   });
 });
