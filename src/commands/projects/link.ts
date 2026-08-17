@@ -68,7 +68,7 @@ async function runNpmSetupIfPresent(): Promise<void> {
 export function registerProjectLinkCommand(program: Command): void {
   program
     .command('link')
-    .description('Link current directory to an Yarah project (no args: installs agent skills only)')
+    .description('Link current directory to a Yarah project (no args: installs agent skills only)')
     .option('--project-id <id>', 'Project ID to link')
     .option('--org-id <id>', 'Organization ID')
     .option('--template <template>', 'Download a template after linking: react, nextjs, chatbot, crm, e-commerce, todo')
@@ -132,7 +132,7 @@ export function registerProjectLinkCommand(program: Command): void {
               outputJson({ success: true, skills_only: true });
             } else {
               clack.note(
-                `Open your coding agent (Claude Code, Codex, Cursor, etc.) and ask it to build something. It will walk you through provisioning an Yarah project when needed. If you're not signed in yet, your browser will open for sign-in at that point.`,
+                `Open your coding agent (Claude Code, Codex, Cursor, etc.) and ask it to build something. It will walk you through provisioning a Yarah project when needed. If you're not signed in yet, your browser will open for sign-in at that point.`,
                 "What's next",
               );
             }

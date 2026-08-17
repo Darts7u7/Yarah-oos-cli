@@ -305,7 +305,7 @@ export async function ossFetch(
 }
 
 /**
- * Probe an Yarah backend's `/api/health` on an EXPLICIT base URL.
+ * Probe a Yarah backend's `/api/health` on an EXPLICIT base URL.
  *
  * Unlike `ossFetch`, this deliberately does not read the linked project: a
  * freshly created branch is not linked yet, and the whole point is to ask

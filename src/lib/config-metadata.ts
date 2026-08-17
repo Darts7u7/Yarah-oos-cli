@@ -191,7 +191,7 @@ function asRetentionDays(v: unknown): number | null | undefined {
 }
 
 /**
- * Project the raw metadata response onto an YarahConfig suitable for
+ * Project the raw metadata response onto a YarahConfig suitable for
  * writing back as `yarah.toml`. Mirrors liveFromMetadata's presence
  * detection but emits the schema shape (optional everything) and tracks
  * sections the backend doesn't yet expose so export can warn the user.

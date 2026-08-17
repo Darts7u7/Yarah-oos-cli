@@ -593,9 +593,9 @@ export async function downloadTemplate(
 
     const frame = framework === 'nextjs' ? 'nextjs' : 'react';
     const esc = (s: string) => process.platform === 'win32' ? `"${s.replace(/"/g, '\\"')}"` : `'${s.replace(/'/g, "'\\''")}'`;
-    const command = `npx --yes create.apps.yarah.dev@latest ${esc(targetDir)} --frame ${frame} --base-url ${esc(projectConfig.oss_host)} --anon-key ${esc(anonKey)} --skip-install`;
+    const command = `npx --yes create-yarah-app@latest ${esc(targetDir)} --frame ${frame} --base-url ${esc(projectConfig.oss_host)} --anon-key ${esc(anonKey)} --skip-install`;
 
-    s?.message(`Running create.apps.yarah.dev (${frame})...`);
+    s?.message(`Running create-yarah-app (${frame})...`);
 
     await execAsync(command, {
       maxBuffer: 10 * 1024 * 1024,

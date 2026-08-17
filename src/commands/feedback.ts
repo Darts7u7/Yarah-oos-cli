@@ -150,7 +150,7 @@ export function registerFeedbackCommand(program: Command): void {
   program
     .command('feedback')
     .description(
-      'Report an Yarah-side hurdle — a bug (including docs-vs-behavior discrepancies), a missing ' +
+      'Report a Yarah-side hurdle — a bug (including docs-vs-behavior discrepancies), a missing ' +
       'capability, or DX friction — to the Yarah team. For agents: use this whenever any part of ' +
       'the Yarah toolkit (backend, an SDK, the CLI, agent skills, docs) got in your way — not the ' +
       'app you are building. Emails, tokens, keys, and usernames are redacted locally before submission.',

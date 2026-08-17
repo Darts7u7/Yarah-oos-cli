@@ -246,7 +246,7 @@ npx @yarahdev/cli create --name "my-app" --marketplace <slug>                   
 
 #### `npx @yarahdev/cli link`
 
-Link the current directory to an Yarah project. Creates `.yarah/project.json` with the project ID, API key, and OSS host URL.
+Link the current directory to a Yarah project. Creates `.yarah/project.json` with the project ID, API key, and OSS host URL.
 
 ```bash
 # Interactive: select from a list
@@ -1156,7 +1156,7 @@ npx @yarahdev/cli --json diagnose incident
 
 ### Web Scraper — `npx @yarahdev/cli webscraper`
 
-Connect a web scraper provider to the linked Yarah project. Provider-specific commands live under `webscraper <provider>` (Apify is the first provider). These commands are intended for developers and agents who want to scrape or pull external data into a project: connect the account once, then let the local agent run the provider's tools using an Yarah-managed token. Runtime data calls should fetch a fresh token from Yarah rather than embedding a personal key.
+Connect a web scraper provider to the linked Yarah project. Provider-specific commands live under `webscraper <provider>` (Apify is the first provider). These commands are intended for developers and agents who want to scrape or pull external data into a project: connect the account once, then let the local agent run the provider's tools using a Yarah-managed token. Runtime data calls should fetch a fresh token from Yarah rather than embedding a personal key.
 
 #### `npx @yarahdev/cli webscraper apify connect`
 
@@ -1317,7 +1317,7 @@ Global configuration is stored in `~/.yarah/`:
 
 ## Agent Skills
 
-When you run `npx @yarahdev/cli create` or `npx @yarahdev/cli link`, the CLI automatically installs a set of [Yarah agent skills](https://github.com/Yarah/agent-skills) into your project for all supported AI coding agents (Claude Code, Cursor, Windsurf, Cline, Roo, Gemini CLI, GitHub Copilot, Qwen, Qoder, Trae, Kilo, Codex, Augment, Antigravity). These skills teach your coding agent how to work with Yarah — database queries, auth, storage, edge functions, realtime, etc. — so it can generate correct code for your backend without you copy-pasting docs.
+When you run `npx @yarahdev/cli create` or `npx @yarahdev/cli link`, the CLI automatically installs a set of [Yarah agent skills](https://github.com/Darts7u7/Yarah-oos-skills) into your project for all supported AI coding agents (Claude Code, Cursor, Windsurf, Cline, Roo, Gemini CLI, GitHub Copilot, Qwen, Qoder, Trae, Kilo, Codex, Augment, Antigravity). These skills teach your coding agent how to work with Yarah — database queries, auth, storage, edge functions, realtime, etc. — so it can generate correct code for your backend without you copy-pasting docs.
 
 It also installs [`find-skills`](https://github.com/vercel-labs/skills) so agents can discover available skills on demand.
 
