@@ -1,0 +1,333 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { Command } from 'commander';
+
+const apiMock = vi.hoisted(() => ({
+  startPosthogCliFlow: vi.fn(),
+  pollPosthogConnection: vi.fn(),
+  fetchPosthogConnection: vi.fn(),
+  readOssPosthogConnection: vi.fn(),
+  storePosthogKey: vi.fn(),
+}));
+vi.mock('../../lib/api/posthog.js', () => apiMock);
+
+const configMock = vi.hoisted(() => ({
+  getProjectConfig: vi.fn(() => ({ project_id: 'p1', project_name: 'Test Project' })),
+  getAccessToken: vi.fn((): string | null => 'tok'),
+  FAKE_PROJECT_ID: 'fa4e0000-1234-5678-90ab-cd1234567890',
+}));
+vi.mock('../../lib/config.js', () => configMock);
+
+const analyticsMock = vi.hoisted(() => ({
+  trackPosthog: vi.fn(),
+  shutdownAnalytics: vi.fn(async () => {}),
+}));
+vi.mock('../../lib/analytics.js', () => analyticsMock);
+
+vi.mock('../../lib/prompts.js', () => ({ isInteractive: false }));
+
+// `open` is loaded dynamically inside runConnectFlow; mock so the real browser
+// launch doesn't fire during tests.
+vi.mock('open', () => ({ default: vi.fn() }));
+
+// Silence interactive UI noise from clack — tests assert on mocks, not stdout.
+const clackNoteMock = vi.hoisted(() => vi.fn());
+vi.mock('@clack/prompts', async (orig) => {
+  const actual = (await orig()) as Record<string, unknown>;
+  return {
+    ...actual,
+    intro: vi.fn(),
+    outro: vi.fn(),
+    note: clackNoteMock,
+    log: { info: vi.fn(), success: vi.fn(), warn: vi.fn(), error: vi.fn() },
+    spinner: vi.fn(() => ({ start: vi.fn(), stop: vi.fn(), message: vi.fn() })),
+  };
+});
+
+const outputMock = vi.hoisted(() => ({
+  outputJson: vi.fn(),
+  outputSuccess: vi.fn(),
+}));
+vi.mock('../../lib/output.js', () => outputMock);
+
+// Imports must come AFTER the vi.mock calls because Vitest hoists the mocks
+// but ESM module evaluation order still matters.
+import { registerPosthogSetupCommand } from './setup.js';
+
+interface RunResult {
+  exitCode?: number;
+}
+
+// Set up a Command tree with the global --json / --api-url flags the real
+// program defines, then run `posthog setup` against it. Override process.exit
+// so handleError doesn't kill the test process; capture the first exit code.
+async function runSetup(argv: string[]): Promise<RunResult> {
+  const program = new Command();
+  program.option('--json').option('--api-url <url>').option('-y, --yes');
+  const posthog = program.command('posthog');
+  registerPosthogSetupCommand(posthog);
+
+  const origExit = process.exit;
+  const result: RunResult = {};
+  (process.exit as unknown) = (code?: number) => {
+    if (result.exitCode === undefined) result.exitCode = code;
+    throw new Error('__exit__');
+  };
+  try {
+    await program.parseAsync(['node', 'test', 'posthog', 'setup', ...argv]).catch((err) => {
+      if (err instanceof Error && err.message === '__exit__') return;
+      throw err;
+    });
+  } finally {
+    process.exit = origExit;
+  }
+  return result;
+}
+
+beforeEach(() => {
+  apiMock.startPosthogCliFlow.mockReset();
+  apiMock.pollPosthogConnection.mockReset();
+  apiMock.fetchPosthogConnection.mockReset();
+  apiMock.readOssPosthogConnection.mockReset();
+  apiMock.storePosthogKey.mockReset();
+  apiMock.readOssPosthogConnection.mockResolvedValue(null);
+  apiMock.storePosthogKey.mockResolvedValue({
+    personalApiKey: { configured: true, maskedKey: 'phx_AaBb••••••••WxYz' },
+    host: 'https://us.posthog.com',
+    posthogProjectId: '4242',
+    projectName: 'Web',
+    organizationName: 'Acme',
+  });
+  outputMock.outputJson.mockReset();
+  outputMock.outputSuccess.mockReset();
+  clackNoteMock.mockReset();
+  analyticsMock.trackPosthog.mockReset();
+  analyticsMock.shutdownAnalytics.mockClear();
+  configMock.getProjectConfig.mockReturnValue({ project_id: 'p1', project_name: 'Test Project' });
+  configMock.getAccessToken.mockReturnValue('tok');
+});
+
+describe('posthog setup', () => {
+  describe('ensureDashboardConnection', () => {
+    it('fast path: cli-start says connected → verifies via /connection, skips polling', async () => {
+      apiMock.startPosthogCliFlow.mockResolvedValue({ type: 'connected' });
+      apiMock.fetchPosthogConnection.mockResolvedValue({
+        kind: 'connected',
+        connection: { apiKey: 'phc_', host: 'h', posthogProjectId: '1' },
+      });
+
+      await runSetup(['--skip-browser']);
+
+      expect(apiMock.startPosthogCliFlow).toHaveBeenCalledOnce();
+      expect(apiMock.fetchPosthogConnection).toHaveBeenCalledOnce();
+      expect(apiMock.pollPosthogConnection).not.toHaveBeenCalled();
+    });
+
+    it('OAuth path: cli-start returns authorizeUrl → polls until connected', async () => {
+      apiMock.startPosthogCliFlow.mockResolvedValue({
+        type: 'authorize',
+        authorizeUrl: 'https://example.com/auth',
+      });
+      apiMock.pollPosthogConnection.mockResolvedValue({
+        apiKey: 'phc_',
+        host: 'h',
+        posthogProjectId: '1',
+      });
+
+      await runSetup(['--skip-browser']);
+
+      expect(apiMock.pollPosthogConnection).toHaveBeenCalledOnce();
+      expect(apiMock.fetchPosthogConnection).not.toHaveBeenCalled();
+    });
+
+    it('fast-path data-drift: cli-start says connected but /connection says no → exits non-zero', async () => {
+      apiMock.startPosthogCliFlow.mockResolvedValue({ type: 'connected' });
+      apiMock.fetchPosthogConnection.mockResolvedValue({ kind: 'not-connected' });
+
+      const r = await runSetup(['--skip-browser']);
+
+      expect(r.exitCode).toBeGreaterThan(0);
+      expect(clackNoteMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('self-hosted', () => {
+    const CONNECTION = {
+      apiKey: 'phc_pub',
+      host: 'https://us.posthog.com',
+      posthogProjectId: '4242',
+      projectName: 'Web',
+    };
+
+    it('--key stores via the local backend and never needs a cloud login', async () => {
+      configMock.getAccessToken.mockReturnValue(null);
+      apiMock.readOssPosthogConnection.mockResolvedValue(CONNECTION);
+
+      const r = await runSetup(['--key', 'phx_secret']);
+
+      expect(r.exitCode).toBeUndefined();
+      expect(apiMock.storePosthogKey).toHaveBeenCalledWith({
+        personalApiKey: 'phx_secret',
+        region: 'US',
+      });
+      // The whole cloud flow is bypassed, not just the login check.
+      expect(apiMock.startPosthogCliFlow).not.toHaveBeenCalled();
+      expect(clackNoteMock).toHaveBeenCalledOnce();
+    });
+
+    it('--key "" is rejected locally instead of falling through to OAuth', async () => {
+      const r = await runSetup(['--key', '']);
+
+      expect(r.exitCode).toBeGreaterThan(0);
+      expect(apiMock.storePosthogKey).not.toHaveBeenCalled();
+      expect(apiMock.startPosthogCliFlow).not.toHaveBeenCalled();
+    });
+
+    it('normalises --region and passes an explicit project id through', async () => {
+      apiMock.readOssPosthogConnection.mockResolvedValue(CONNECTION);
+
+      await runSetup(['--key', 'phx_secret', '--region', 'eu', '--posthog-project-id', '7']);
+
+      expect(apiMock.storePosthogKey).toHaveBeenCalledWith({
+        personalApiKey: 'phx_secret',
+        region: 'EU',
+        posthogProjectId: '7',
+      });
+    });
+
+    it('rejects an unknown --region before touching the backend', async () => {
+      const r = await runSetup(['--key', 'phx_secret', '--region', 'APAC']);
+
+      expect(r.exitCode).toBeGreaterThan(0);
+      expect(apiMock.storePosthogKey).not.toHaveBeenCalled();
+    });
+
+    // The dashboard's setup prompt runs the bare command — no login required.
+    it('bare setup hands off an existing local connection without a login', async () => {
+      configMock.getProjectConfig.mockReturnValue({
+        project_id: 'fa4e0000-1234-5678-90ab-cd1234567890',
+        project_name: 'OSS Project',
+      });
+      configMock.getAccessToken.mockReturnValue(null);
+      apiMock.readOssPosthogConnection.mockResolvedValue(CONNECTION);
+
+      const r = await runSetup([]);
+
+      expect(r.exitCode).toBeUndefined();
+      expect(apiMock.startPosthogCliFlow).not.toHaveBeenCalled();
+      expect(apiMock.storePosthogKey).not.toHaveBeenCalled();
+      expect(clackNoteMock).toHaveBeenCalledOnce();
+    });
+
+    // A sentinel-linked project must never reach the cloud flow — even with a
+    // cloud login present on the machine, cli-start would 4xx on the fake id.
+    it('bare setup on an OSS link never falls into the cloud flow', async () => {
+      configMock.getProjectConfig.mockReturnValue({
+        project_id: 'fa4e0000-1234-5678-90ab-cd1234567890',
+        project_name: 'OSS Project',
+      });
+
+      const r = await runSetup([]);
+
+      expect(r.exitCode).toBeGreaterThan(0);
+      expect(apiMock.startPosthogCliFlow).not.toHaveBeenCalled();
+    });
+
+    it('bare setup on a cloud link without a login still asks for insforge login', async () => {
+      configMock.getAccessToken.mockReturnValue(null);
+
+      const r = await runSetup([]);
+
+      expect(r.exitCode).toBeGreaterThan(0);
+      expect(apiMock.startPosthogCliFlow).not.toHaveBeenCalled();
+      // Mode-first: the cloud path never touches the local backend.
+      expect(apiMock.readOssPosthogConnection).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('wizard handoff', () => {
+    beforeEach(() => {
+      apiMock.startPosthogCliFlow.mockResolvedValue({ type: 'connected' });
+      apiMock.fetchPosthogConnection.mockResolvedValue({
+        kind: 'connected',
+        connection: { apiKey: 'phc_', host: 'h', posthogProjectId: '1' },
+      });
+    });
+
+    it('always prints the wizard command in a Next step note (no spawn, no TTY check)', async () => {
+      await runSetup(['--skip-browser']);
+
+      expect(clackNoteMock).toHaveBeenCalledOnce();
+      const [body, title] = clackNoteMock.mock.calls[0];
+      expect(title).toBe('Next step');
+      expect(body).toMatch(/npx(\.cmd)? -y @posthog\/wizard@latest/);
+      // The note must make it unmissable that setup is incomplete until the
+      // user runs the wizard, and surface the connected project's public
+      // client key so env vars can be wired against the right project.
+      expect(body).toContain('⚠️');
+      expect(body).toContain('NOT finished');
+      expect(body).toContain('phc_');
+    });
+  });
+
+  describe('--json mode', () => {
+    it('emits JSON with wizardSkipped=true and wizardCommand', async () => {
+      apiMock.startPosthogCliFlow.mockResolvedValue({ type: 'connected' });
+      apiMock.fetchPosthogConnection.mockResolvedValue({
+        kind: 'connected',
+        connection: { apiKey: 'phc_', host: 'h', posthogProjectId: '1' },
+      });
+
+      const program = new Command();
+      program.option('--json').option('--api-url <url>').option('-y, --yes');
+      const posthog = program.command('posthog');
+      registerPosthogSetupCommand(posthog);
+      await program.parseAsync(['node', 'test', '--json', 'posthog', 'setup', '--skip-browser']);
+
+      // No clack note in JSON mode (stdout stays clean for piped consumers).
+      expect(clackNoteMock).not.toHaveBeenCalled();
+      expect(outputMock.outputJson).toHaveBeenCalledOnce();
+      const payload = outputMock.outputJson.mock.calls[0][0] as {
+        success: boolean;
+        wizardSkipped: boolean;
+        wizardCommand: string;
+        connection: { apiKey?: string; host?: string; posthogProjectId?: string | number };
+      };
+      expect(payload.success).toBe(true);
+      expect(payload.wizardSkipped).toBe(true);
+      expect(payload.wizardCommand).toMatch(/^npx(\.cmd)? -y @posthog\/wizard@latest$/);
+      expect(payload.connection).toMatchObject({
+        apiKey: 'phc_',
+        host: 'h',
+        posthogProjectId: '1',
+      });
+    });
+  });
+
+  describe('analytics', () => {
+    it('fires cli_posthog_invoked with the project config and flushes on success', async () => {
+      apiMock.startPosthogCliFlow.mockResolvedValue({ type: 'connected' });
+      apiMock.fetchPosthogConnection.mockResolvedValue({
+        kind: 'connected',
+        connection: { apiKey: 'phc_', host: 'h', posthogProjectId: '1' },
+      });
+
+      await runSetup(['--skip-browser']);
+
+      expect(analyticsMock.trackPosthog).toHaveBeenCalledOnce();
+      expect(analyticsMock.trackPosthog).toHaveBeenCalledWith(
+        'setup',
+        expect.objectContaining({ project_id: 'p1' }),
+      );
+      expect(analyticsMock.shutdownAnalytics).toHaveBeenCalledOnce();
+    });
+
+    it('still flushes analytics when setup fails', async () => {
+      apiMock.startPosthogCliFlow.mockResolvedValue({ type: 'connected' });
+      apiMock.fetchPosthogConnection.mockResolvedValue({ kind: 'not-connected' });
+
+      await runSetup(['--skip-browser']);
+
+      expect(analyticsMock.shutdownAnalytics).toHaveBeenCalledOnce();
+    });
+  });
+});

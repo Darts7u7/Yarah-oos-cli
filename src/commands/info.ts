@@ -1,0 +1,68 @@
+import type { Command } from 'commander';
+import { getCredentials, getGlobalConfig, getProjectConfig } from '../lib/config.js';
+import { handleError, getRootOpts } from '../lib/errors.js';
+import { outputJson } from '../lib/output.js';
+import { trackTopLevelUsage } from '../lib/command-telemetry.js';
+
+export function registerContextCommand(program: Command): void {
+  program
+    .command('current')
+    .description('Show current CLI context (user, org, project)')
+    .action(async (_opts, cmd) => {
+      const { json } = getRootOpts(cmd);
+      try {
+        const creds = getCredentials();
+        const globalConfig = getGlobalConfig();
+        const projectConfig = getProjectConfig();
+
+        await trackTopLevelUsage('current', true);
+
+        if (json) {
+          // Strip the privileged api_key — identity output must not leak
+          // credentials (the human-readable branch already omits it).
+          const project = projectConfig
+            ? (({ api_key: _api_key, ...rest }) => rest)(projectConfig)
+            : null;
+          outputJson({
+            authenticated: !!creds,
+            user: creds?.user ?? null,
+            default_org_id: globalConfig.default_org_id ?? null,
+            project,
+          });
+          return;
+        }
+
+        console.log('\n  InsForge CLI Context\n');
+
+        // Auth status
+        if (creds) {
+          console.log(`  User:          ${creds.user.name} <${creds.user.email}>`);
+        } else {
+          console.log('  User:          (not logged in)');
+        }
+
+        // Org (only relevant when logged in)
+        if (creds && globalConfig.default_org_id) {
+          console.log(`  Default Org:   ${globalConfig.default_org_id}`);
+        } else if (creds) {
+          console.log('  Default Org:   (none)');
+        }
+
+        // Project
+        if (projectConfig) {
+          console.log('');
+          console.log(`  Project:       ${projectConfig.project_name} (${projectConfig.project_id})`);
+          console.log(`  App Key:       ${projectConfig.appkey}`);
+          console.log(`  Region:        ${projectConfig.region}`);
+          console.log(`  OSS Host:      ${projectConfig.oss_host}`);
+        } else {
+          console.log('\n  Project:       (not linked — run `npx @insforge/cli link`)');
+        }
+
+        console.log('');
+      } catch (err) {
+        await trackTopLevelUsage('current', false, {}, err);
+        handleError(err, json);
+      }
+    });
+}

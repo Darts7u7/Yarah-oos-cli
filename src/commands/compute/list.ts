@@ -1,0 +1,65 @@
+import type { Command } from 'commander';
+import { ossFetch } from '../../lib/api/oss.js';
+import { requireAuth } from '../../lib/credentials.js';
+import { handleError, getRootOpts } from '../../lib/errors.js';
+import { outputJson, outputTable } from '../../lib/output.js';
+import { reportCliUsage } from '../../lib/skills.js';
+import { trackCommandUsage } from '../../lib/command-telemetry.js';
+
+export function registerComputeListCommand(computeCmd: Command): void {
+  computeCmd
+    .command('list')
+    .description('List all compute services')
+    .action(async (_opts, cmd) => {
+      const { json } = getRootOpts(cmd);
+      try {
+        await requireAuth();
+
+        const res = await ossFetch('/api/compute/services');
+        const raw = await res.json();
+        const services: Record<string, unknown>[] = Array.isArray(raw) ? raw : [];
+
+        await trackCommandUsage('compute', 'list', true, {
+          result_count: services.length,
+        });
+
+        if (json) {
+          outputJson(services);
+        } else {
+          if (services.length === 0) {
+            console.log('No compute services found.');
+            await reportCliUsage('cli.compute.list', true);
+            return;
+          }
+          outputTable(
+            // ID first: it's the value `compute get/update/stop/delete <id>`
+            // expect, so it should be the easiest column to copy out of `list`.
+            ['ID', 'Name', 'Status', 'Image', 'CPU', 'Memory', 'Endpoint'],
+            services.map((s) => {
+              // For TCP services the backend's endpointUrl is still https:// (no
+              // listener answers there). Show the usable host:port form so users
+              // can copy it straight into redis-cli / psql / etc.
+              const endpoint =
+                s.protocol === 'tcp' && s.endpointUrl && s.port
+                  ? `${String(s.endpointUrl).replace(/^https?:\/\//, '')}:${s.port}`
+                  : String(s.endpointUrl ?? '-');
+              return [
+                String(s.id ?? '-'),
+                String(s.name ?? '-'),
+                String(s.status ?? '-'),
+                String(s.imageUrl ?? '-'),
+                String(s.cpu ?? '-'),
+                s.memory ? `${s.memory}MB` : '-',
+                endpoint,
+              ];
+            }),
+          );
+        }
+        await reportCliUsage('cli.compute.list', true);
+      } catch (err) {
+        await reportCliUsage('cli.compute.list', false);
+        await trackCommandUsage('compute', 'list', false, {}, err);
+        handleError(err, json);
+      }
+    });
+}

@@ -1,0 +1,187 @@
+import { existsSync, mkdirSync, readFileSync, writeFileSync, unlinkSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
+import type { GlobalConfig, PendingDeviceLogin, ProjectConfig, StoredCredentials } from '../types.js';
+
+const GLOBAL_DIR = join(homedir(), '.insforge');
+const CREDENTIALS_FILE = join(GLOBAL_DIR, 'credentials.json');
+const CONFIG_FILE = join(GLOBAL_DIR, 'config.json');
+
+const DEFAULT_PLATFORM_URL = 'https://api.insforge.dev';
+const DEFAULT_FRONTEND_URL = 'https://insforge.dev';
+
+/** Sentinel project ID for OSS/self-hosted linking (valid UUID, never matches a real project). */
+export const FAKE_PROJECT_ID = 'fa4e0000-1234-5678-90ab-cd1234567890';
+export const FAKE_ORG_ID = 'fa4e0001-1234-5678-90ab-cd1234567890';
+
+/** OSS sentinel IDs written by older CLI builds (≤0.1.47): first
+ *  'oss-project'/'oss-org', then interim fake UUIDs, before the
+ *  FAKE_PROJECT_ID/FAKE_ORG_ID constants above landed. Healed by
+ *  getProjectConfig so requireAuth's OSS bypass keeps matching. */
+const LEGACY_OSS_PROJECT_IDS = new Set(['oss-project', 'fa4e0000-1234-5678-90ab-0e02b2c3d479']);
+const LEGACY_OSS_ORG_IDS = new Set(['oss-org', 'fa4e0001-1234-5678-90ab-0e02b2c3d479']);
+
+function ensureGlobalDir(): void {
+  if (!existsSync(GLOBAL_DIR)) {
+    mkdirSync(GLOBAL_DIR, { recursive: true });
+  }
+}
+
+// --- Global Config ---
+
+export function getGlobalConfig(): GlobalConfig {
+  if (!existsSync(CONFIG_FILE)) {
+    return { platform_api_url: DEFAULT_PLATFORM_URL };
+  }
+  const raw = readFileSync(CONFIG_FILE, 'utf-8');
+  return JSON.parse(raw);
+}
+
+export function saveGlobalConfig(config: GlobalConfig): void {
+  ensureGlobalDir();
+  writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
+}
+
+// --- Credentials ---
+
+export function getCredentials(): StoredCredentials | null {
+  if (!existsSync(CREDENTIALS_FILE)) {
+    return null;
+  }
+  const raw = readFileSync(CREDENTIALS_FILE, 'utf-8');
+  return JSON.parse(raw);
+}
+
+export function saveCredentials(creds: StoredCredentials): void {
+  ensureGlobalDir();
+  writeFileSync(CREDENTIALS_FILE, JSON.stringify(creds, null, 2), { mode: 0o600 });
+}
+
+// --- Pending device login (login --device) ---
+
+const PENDING_DEVICE_FILE = join(GLOBAL_DIR, 'pending-device.json');
+
+export function getPendingDeviceLogin(): PendingDeviceLogin | null {
+  if (!existsSync(PENDING_DEVICE_FILE)) {
+    return null;
+  }
+  return JSON.parse(readFileSync(PENDING_DEVICE_FILE, 'utf-8'));
+}
+
+export function savePendingDeviceLogin(pending: PendingDeviceLogin): void {
+  ensureGlobalDir();
+  writeFileSync(PENDING_DEVICE_FILE, JSON.stringify(pending, null, 2), { mode: 0o600 });
+}
+
+export function clearPendingDeviceLogin(): void {
+  if (existsSync(PENDING_DEVICE_FILE)) {
+    unlinkSync(PENDING_DEVICE_FILE);
+  }
+}
+
+export function clearCredentials(): void {
+  if (existsSync(CREDENTIALS_FILE)) {
+    unlinkSync(CREDENTIALS_FILE);
+  }
+  clearPendingDeviceLogin();
+  // Clear session-related config (default_org_id) but keep platform_api_url etc.
+  const config = getGlobalConfig();
+  if (config.default_org_id) {
+    delete config.default_org_id;
+    saveGlobalConfig(config);
+  }
+}
+
+// --- Project Config (local) ---
+
+function getLocalConfigDir(): string {
+  return join(process.cwd(), '.insforge');
+}
+
+function getLocalConfigFile(): string {
+  return join(getLocalConfigDir(), 'project.json');
+}
+
+/** Path to the backup of `.insforge/project.json` written by `branch switch`
+ *  the first time the directory is moved off the parent project. Restored
+ *  by `branch switch --parent`. Exported so switch.ts can manage the file. */
+export function getParentBackupFile(): string {
+  return join(getLocalConfigDir(), 'project.parent.json');
+}
+
+/** Exposed so command code (e.g. branch switch) can write the active
+ *  project file path verbatim. */
+export function getProjectConfigFile(): string {
+  return getLocalConfigFile();
+}
+
+export function getProjectConfig(): ProjectConfig | null {
+  const file = getLocalConfigFile();
+  if (!existsSync(file)) {
+    return null;
+  }
+  const raw = readFileSync(file, 'utf-8');
+  const config = JSON.parse(raw) as ProjectConfig;
+  // Heal legacy configs written by `branch switch` before 0.1.70 — that build
+  // stored `oss_host` as a bare hostname, which `fetch()` rejects with
+  // "Failed to parse URL". Normalize in-memory so existing links keep working;
+  // the next `saveProjectConfig` call persists the fix to disk.
+  if (config.oss_host && !/^https?:\/\//.test(config.oss_host) && config.appkey && config.region) {
+    config.oss_host = buildOssHost(config.appkey, config.region);
+  }
+  // Heal legacy OSS sentinel IDs written by `link --api-base-url` in CLI
+  // ≤0.1.47 — requireAuth's OSS bypass only matches FAKE_PROJECT_ID, so
+  // without this, self-hosted links from those builds redirect db/functions
+  // commands to cloud OAuth. Normalize in-memory so existing links keep
+  // working; the next `saveProjectConfig` call persists the fix to disk.
+  if (LEGACY_OSS_PROJECT_IDS.has(config.project_id)) {
+    config.project_id = FAKE_PROJECT_ID;
+  }
+  if (LEGACY_OSS_ORG_IDS.has(config.org_id)) {
+    config.org_id = FAKE_ORG_ID;
+  }
+  return config;
+}
+
+export function saveProjectConfig(config: ProjectConfig): void {
+  const dir = getLocalConfigDir();
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true });
+  }
+  writeFileSync(getLocalConfigFile(), JSON.stringify(config, null, 2), { mode: 0o600 });
+}
+
+/**
+ * Canonical OSS host URL for a cloud project. Always includes the `https://`
+ * scheme — `oss_host` is fed straight into `fetch()`, which rejects bare
+ * hostnames with "Failed to parse URL".
+ */
+export function buildOssHost(appkey: string, region: string): string {
+  return `https://${appkey}.${region}.insforge.app`;
+}
+
+// --- Resolved values (env vars > flags > config) ---
+
+export function getPlatformApiUrl(override?: string): string {
+  return process.env.INSFORGE_API_URL ?? override ?? getGlobalConfig().platform_api_url ?? DEFAULT_PLATFORM_URL;
+}
+
+export function getFrontendUrl(): string {
+  return process.env.INSFORGE_FRONTEND_URL ?? DEFAULT_FRONTEND_URL;
+}
+
+export function getAccessToken(): string | null {
+  // Env override wins and must work even if credentials.json is missing or
+  // corrupt — so check it BEFORE reading/parsing the file (getCredentials can
+  // throw on malformed JSON).
+  if (process.env.INSFORGE_ACCESS_TOKEN) return process.env.INSFORGE_ACCESS_TOKEN;
+  // Then: direct user API key (uak_) > OAuth/exchange JWT. refresh_token is
+  // intentionally NOT a fallback here — it is refresh fuel, not a bearer
+  // credential (an OAuth refresh token would just 401).
+  const creds = getCredentials();
+  return creds?.user_api_key ?? creds?.access_token ?? null;
+}
+
+export function getProjectId(override?: string): string | null {
+  return process.env.INSFORGE_PROJECT_ID ?? override ?? getProjectConfig()?.project_id ?? null;
+}

@@ -1,0 +1,130 @@
+// CLI/src/commands/config/export.ts
+import type { Command } from 'commander';
+import { writeFileSync, existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+import * as p from '@clack/prompts';
+import pc from 'picocolors';
+import { ossFetch } from '../../lib/api/oss.js';
+import { requireAuth } from '../../lib/credentials.js';
+import { handleError, getRootOpts, CLIError } from '../../lib/errors.js';
+import { stringifyConfigToml } from '../../lib/config-toml.js';
+import {
+  configFromMetadata,
+  type RawMetadataResponse,
+  type RawRetentionConfig,
+  type RawStorageConfig,
+} from '../../lib/config-metadata.js';
+import { reportCliUsage } from '../../lib/skills.js';
+import { trackConfig, shutdownAnalytics } from '../../lib/analytics.js';
+import { getProjectConfig } from '../../lib/config.js';
+
+export function registerConfigExportCommand(cfg: Command): void {
+  cfg
+    .command('export')
+    .description('Pull live project config and write insforge.toml')
+    .option('--out <path>', 'output path', 'insforge.toml')
+    .option('--force', 'overwrite without confirmation')
+    .action(async (opts, cmd) => {
+      const { json } = getRootOpts(cmd);
+      let projectConfig: ReturnType<typeof getProjectConfig> = null;
+      try {
+        projectConfig = getProjectConfig();
+        await requireAuth();
+
+        const target = resolve(process.cwd(), opts.out);
+        if (existsSync(target) && !opts.force) {
+          if (json) {
+            // No TTY in --json runs; bail with an actionable error instead
+            // of hanging on an interactive prompt.
+            throw new CLIError(
+              `${opts.out} exists. Re-run with --force to overwrite.`,
+              1,
+              'OUTPUT_EXISTS',
+            );
+          }
+          const ok = await p.confirm({
+            message: `${opts.out} exists. Overwrite?`,
+            initialValue: false,
+          });
+          if (!ok || p.isCancel(ok)) {
+            console.log('Aborted.');
+            await reportCliUsage('cli.config.export', true);
+            trackConfig('export', projectConfig, {
+              json_mode: !!json,
+              force: !!opts.force,
+              outcome: 'aborted',
+            });
+            return;
+          }
+        }
+
+        const res = await ossFetch('/api/metadata');
+        const raw = (await res.json()) as RawMetadataResponse;
+        const [storageConfig, realtimeConfig, schedulesConfig] = await Promise.all([
+          fetchOptionalConfig<RawStorageConfig>('/api/storage/config'),
+          fetchOptionalConfig<RawRetentionConfig>('/api/realtime/config'),
+          fetchOptionalConfig<RawRetentionConfig>('/api/schedules/config'),
+        ]);
+
+        const { config, skipped } = configFromMetadata(raw, {
+          storageConfig,
+          realtimeConfig,
+          schedulesConfig,
+        });
+
+        const toml = stringifyConfigToml(config);
+        writeFileSync(target, toml, 'utf8');
+
+        if (json) {
+          console.log(JSON.stringify({ written: target, config, skipped }, null, 2));
+        } else {
+          console.log(`${pc.green('✓')} Wrote ${target}`);
+          if (skipped.length) {
+            console.warn(
+              pc.yellow(
+                `⚠ Skipped ${skipped.length} section(s) not supported by this backend:`,
+              ) +
+                '\n' +
+                skipped.map((k) => `  - ${k}`).join('\n'),
+            );
+          }
+        }
+        await reportCliUsage('cli.config.export', true);
+        trackConfig('export', projectConfig, {
+          json_mode: !!json,
+          force: !!opts.force,
+          skipped_count: skipped.length,
+          outcome: 'success',
+        });
+      } catch (err) {
+        await reportCliUsage('cli.config.export', false);
+        trackConfig('export', projectConfig, {
+          json_mode: !!json,
+          force: !!opts.force,
+          outcome: 'error',
+        });
+        await shutdownAnalytics();
+        handleError(err, json);
+      } finally {
+        await shutdownAnalytics();
+      }
+    });
+}
+
+async function fetchOptionalConfig<T>(path: string): Promise<T | undefined> {
+  try {
+    const res = await ossFetch(path);
+    return (await res.json()) as T;
+  } catch (err) {
+    if (isMissingOptionalEndpoint(err)) return undefined;
+    throw err;
+  }
+}
+
+function isMissingOptionalEndpoint(err: unknown): boolean {
+  return (
+    err instanceof CLIError &&
+    err.statusCode === 404 &&
+    (err.code === undefined || err.code === 'NOT_FOUND')
+  );
+}

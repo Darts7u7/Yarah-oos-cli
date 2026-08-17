@@ -1,0 +1,451 @@
+// Platform API types
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar_url: string | null;
+  email_verified: boolean;
+}
+
+export interface LoginResponse {
+  token: string;
+  user: User;
+}
+
+export interface RefreshResponse {
+  token: string;
+}
+
+export interface Organization {
+  id: string;
+  name: string;
+  type: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OrgMembership {
+  organization: Organization;
+  role: string;
+}
+
+export interface Project {
+  id: string;
+  organization_id: string;
+  name: string;
+  appkey: string;
+  region: string;
+  status: string;
+  /** In-flight maintenance operation (e.g. restoring, updating_project_version), null when idle. */
+  operation_status?: string | null;
+  instance_type: string;
+  service_version: string | null;
+  customized_domain: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProjectAuthResponse {
+  code: string;
+  expires_in: number;
+  type: string;
+}
+
+export interface ApiKeyResponse {
+  access_api_key: string;
+}
+
+export interface DatabasePasswordResponse {
+  databasePassword: string;
+}
+
+export interface ConnectionStringResponse {
+  connectionURL: string;
+  parameters: {
+    host: string;
+    port: number;
+    database: string;
+    user: string;
+    password: string;
+    sslmode: string;
+  };
+}
+
+// Stored credentials
+export interface StoredCredentials {
+  access_token: string;
+  /**
+   * Either an OAuth refresh token (opaque string) or a user API key
+   * prefixed `uak_` (for exchange-based PAT logins). The `uak_` prefix is the
+   * discriminator — see `isPatLogin()` in `lib/credentials.ts`.
+   */
+  refresh_token: string;
+  /**
+   * A user API key (`uak_`) used DIRECTLY as the Bearer token — no exchange,
+   * no refresh (set by `login --user-api-key`). When present it takes priority over
+   * `access_token`; a 401 means the key was revoked/expired (re-login needed).
+   * Its presence is the discriminator — see `isDirectApiKeyLogin()`.
+   */
+  user_api_key?: string;
+  user: User;
+}
+
+/**
+ * In-flight device login (`login --device`) persisted so a re-run can resume
+ * polling the SAME code instead of minting a new one — critical in agent
+ * sandboxes that may kill the polling process before the user approves (the
+ * approval still lands, and the re-run redeems it immediately). The
+ * device_code is the bearer secret for this attempt, so the file is 0600 and
+ * cleared on completion, denial, or expiry.
+ */
+export interface PendingDeviceLogin {
+  device_code: string;
+  user_code: string;
+  verification_uri_complete: string;
+  interval: number;
+  expires_at: string;
+  platform_url: string;
+  client_id: string;
+}
+
+// Global config
+export interface GlobalConfig {
+  default_org_id?: string;
+  platform_api_url: string;
+  oauth_client_id?: string;
+}
+
+// Project config (local .insforge/project.json)
+export interface ProjectConfig {
+  project_id: string;
+  project_name: string;
+  org_id: string;
+  appkey: string;
+  region: string;
+  api_key: string;
+  oss_host: string;
+  /** When set, this directory is currently switched onto a branch. Carries
+   *  the original parent project's identifying fields so name → branch_id
+   *  resolution and `branch switch --parent` know where to land back. */
+  branched_from?: { project_id: string; project_name: string };
+  /** When set, persists the human-in-the-loop guard enablement for this project
+   *  (set via `link --guard`). The INSFORGE_GUARD env var still overrides it. */
+  guard?: boolean;
+}
+
+// --- Branching ---
+
+export interface Branch {
+  id: string;
+  parent_project_id: string;
+  organization_id: string;
+  name: string;
+  appkey: string;
+  region: string;
+  status?: string;
+  branch_state: 'creating' | 'ready' | 'merging' | 'merged' | 'conflicted' | 'deleted' | 'resetting';
+  branch_created_at: string;
+  branch_metadata?: {
+    mode: 'full' | 'schema-only';
+    parent_t0?: unknown;
+    source_backup_s3_key?: string;
+  };
+}
+
+export type BranchMode = 'full' | 'schema-only';
+
+export interface DiffChange {
+  schema: string;
+  object: string;
+  type: 'table' | 'policy' | 'function' | 'config_row' | 'migration' | 'edge_function';
+  action: 'add' | 'modify' | 'drop';
+  sql: string;
+}
+
+export interface DiffConflict {
+  schema: string;
+  object: string;
+  type: DiffChange['type'];
+  parent_t0_hash: string;
+  parent_now_hash: string;
+  branch_now_hash: string;
+  hint: string;
+}
+
+export interface DiffResult {
+  summary: { added: number; modified: number; conflicts: number };
+  /** Migration-file-style SQL preview, BEGIN/COMMIT-wrapped, with section
+   *  headers ([DDL] / [DATA] / [MIGRATION]). On conflict, leads with a
+   *  `-- ⚠️ MERGE BLOCKED` banner. Safe to print to stdout / save to file. */
+  rendered_sql: string;
+  changes: DiffChange[];
+  conflicts: DiffConflict[];
+}
+
+export interface MergeExecuteResponse {
+  branchId: string;
+  status: 'merged';
+  diff: DiffResult;
+}
+
+export interface MergeConflictResponse {
+  code: string;
+  error: string;
+  requestId?: string;
+  diff: DiffResult;
+}
+
+// API Error
+export interface ApiError {
+  code?: string;
+  error: string;
+  requestId?: string;
+}
+
+// OSS API types
+
+export type { ListFunctionsResponse, StorageBucketSchema, ListDeploymentsResponse,
+  DatabaseFunctionsResponse, DatabaseIndexesResponse, DatabasePoliciesResponse, DatabaseTriggersResponse,
+  Migration, DatabaseMigrationsResponse, CreateMigrationRequest, CreateMigrationResponse,
+  CreateScheduleResponse, ListSchedulesResponse, GetScheduleResponse, ListExecutionLogsResponse,
+  ListSecretsResponse, GetSecretValueResponse, CreateSecretResponse, DeleteSecretResponse, UpdateSecretResponse,
+  CreateDeploymentResponse, CreateDirectDeploymentRequest, CreateDirectDeploymentResponse,
+  DeploymentManifestFileEntry, DeploymentManifestFile, UploadDeploymentFileResponse,
+  StartDeploymentRequest, DeploymentSchema, DeploymentMetadataResponse
+ } from '@insforge/shared-schemas';
+
+// Function types (kept local: shared-schemas source defines FunctionResponse and
+// DeploymentResult but the published npm package does not export them yet)
+
+export interface FunctionDeploymentResult {
+  id: string;
+  status: 'success' | 'failed';
+  url: string | null;
+  buildLogs?: string[];
+}
+
+export interface FunctionResponse {
+  success: true;
+  message?: string;
+  function: {
+    id: string;
+    slug: string;
+    name: string;
+    description: string | null;
+    code: string;
+    status: 'draft' | 'active' | 'error';
+    createdAt: string;
+    updatedAt: string;
+    deployedAt: string | null;
+  };
+  deployment?: FunctionDeploymentResult | null;
+}
+
+// --- Project management (cloud platform) ---
+
+/** Subset of the project body accepted by PUT /projects/v1/:id. */
+export interface UpdateProjectBody {
+  name?: string;
+  customizedDomain?: string;
+  storageDiskSize?: number;
+}
+
+export interface UpgradeInstanceBody {
+  instanceType: string;
+}
+
+/** Response of GET /platform/insforge/latest-version (public). */
+export interface LatestVersionResponse {
+  version: string;
+  cached: boolean;
+}
+
+/** Returned by upgrade-instance — old/new values plus the refreshed project. */
+export interface UpgradeInstanceResult {
+  message: string;
+  project: Project;
+  previousInstanceType: string;
+  newInstanceType: string;
+  previousVolumeSizeGiB: number;
+  newVolumeSizeGiB: number;
+}
+
+// --- Billing / usage (cloud platform) ---
+
+export interface SubscriptionStatus {
+  status: string;
+  plan: string;
+  currentPeriodEnd?: string;
+  cancelAtPeriodEnd?: boolean;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+}
+
+export interface PaymentRecord {
+  stripe_invoice_id?: string;
+  amount_cents: number;
+  amount_display: string;
+  currency: string;
+  status: string;
+  description: string | null;
+  invoice_pdf_url: string | null;
+  created_at: string;
+}
+
+export interface BillingCycles {
+  current: { start_date: string; end_date: string };
+  previous?: { start_date: string; end_date: string };
+}
+
+export interface CheckoutSession {
+  checkoutUrl: string;
+  sessionId: string;
+}
+
+export interface PortalSession {
+  portalUrl: string;
+}
+
+export interface CreditBalance {
+  creditBalanceCents: number;
+  creditBalanceFormatted: string;
+  transactions: { amountCents: number; description: string; created: string }[];
+}
+
+export interface OrgUsage {
+  organization: { id: string; name: string; price_plan: string };
+  usage_summary: Record<string, number>;
+  projects: { id: string; name: string; status: string; [metric: string]: unknown }[];
+  _meta: { requested_at: string };
+}
+
+// --- Organization members (cloud platform) ---
+
+export type MemberRole = 'administrator' | 'developer';
+
+export interface Member {
+  id: string;
+  organization_id: string;
+  user_id: string;
+  role: MemberRole;
+  invited_by?: string;
+  joined_at: string;
+  name?: string;
+  email?: string;
+  avatar_url?: string;
+}
+
+export interface Invitation {
+  id: string;
+  organization_id: string;
+  email: string;
+  role: MemberRole;
+  status: 'pending' | 'accepted' | 'expired' | 'declined';
+  expires_at: string;
+  created_at: string;
+}
+
+export interface MembersResponse {
+  members: Member[];
+  invitations: Invitation[];
+}
+
+// --- Backups (cloud platform) ---
+
+export interface Backup {
+  id: string;
+  project_id: string;
+  organization_id: string;
+  plan: string;
+  status: 'running' | 'completed' | 'failed';
+  trigger_source: 'manual' | 'scheduled';
+  error_message: string | null;
+  triggered_at: string | null;
+  created_at: string;
+  name: string | null;
+  size_bytes: number | null;
+  created_by: string | null;
+}
+
+/**
+ * GET /projects/v1/:id/backup/latest returns a pointer to the most recent
+ * dump FILE (with a presigned download URL) — NOT a Backup record. Distinct
+ * shape from the `backups` list endpoint.
+ */
+export interface LatestBackup {
+  file: string;
+  download_url: string;
+  size_bytes: number;
+}
+
+// --- Secrets rotation (OSS backend) ---
+
+export interface RotateKeyResponse {
+  success: true;
+  message: string;
+  /** New plaintext key — shown once. `apiKey` for api-key rotate, `anonKey` for anon-key. */
+  apiKey?: string;
+  anonKey?: string;
+  oldKeyExpiresAt: string;
+}
+
+// --- S3 access keys (OSS backend) ---
+
+export interface S3AccessKey {
+  id: string;
+  accessKeyId: string;
+  description: string | null;
+  createdAt: string;
+  lastUsedAt: string | null;
+}
+
+export interface S3AccessKeyWithSecret extends S3AccessKey {
+  /** Plaintext secret — returned only at creation, never again. */
+  secretAccessKey: string;
+}
+
+// --- Advisor suppressions (OSS backend) ---
+
+export type AdvisorSuppressionScope = 'instance' | 'rule';
+
+export const ADVISOR_SUPPRESSION_REASONS = [
+  'false_positive',
+  'accepted_risk',
+  'wont_fix',
+  'other',
+] as const;
+export type AdvisorSuppressionReason = (typeof ADVISOR_SUPPRESSION_REASONS)[number];
+
+export interface AdvisorSuppression {
+  id: string;
+  ruleId: string;
+  /** Set for `instance` scope only — the exact finding this suppresses. */
+  affectedObject?: string;
+  scope: AdvisorSuppressionScope;
+  reason: AdvisorSuppressionReason;
+  note?: string;
+  createdBy?: string;
+  createdAt: string;
+  // Enriched from the latest completed scan when a matching finding exists.
+  title?: string;
+  severity?: 'critical' | 'warning' | 'info';
+  category?: 'security' | 'performance' | 'health';
+}
+
+// --- Database backups (OSS backend) ---
+
+/** Backup record from the OSS backend — distinct shape from the Cloud `Backup`. */
+export interface OssBackup {
+  id: string;
+  name: string | null;
+  triggerSource: 'manual' | 'scheduled';
+  status: 'running' | 'completed' | 'failed';
+  sizeBytes: number | null;
+  errorMessage: string | null;
+  createdAt: string;
+  completedAt: string | null;
+  createdBy: string | null;
+  /** When retention will delete this backup; scheduled backups only. */
+  expiresAt: string | null;
+}
